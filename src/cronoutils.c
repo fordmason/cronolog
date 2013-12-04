@@ -70,7 +70,7 @@
  */
 
 #include "cronoutils.h"
-extern char *tzname[2];
+/*extern char *tzname[2];*/
 
 
 #ifdef _WIN32
@@ -114,6 +114,58 @@ int	period_seconds[] =
     60 * 60 * 24 * 31,
     60 * 60 * 24 * 36
 };
+
+/* Open a new log file: determine the start of the current
+ * period, generate the log file name from the template,
+ * determine the end of the period and open the new log file.
+ *
+ * Returns the file descriptor of the new log file and also sets the
+ * name of the file and the start time of the next period via pointers
+ * supplied.
+ */
+int
+new_log_file(const char *template, const char *linkname, mode_t linktype, const char *prevlinkname,
+	     PERIODICITY periodicity, int period_multiple, int period_delay,
+	     char *pfilename, size_t pfilename_len,
+	     time_t time_now, time_t *pnext_period)
+{
+    time_t 	start_of_period;
+    struct tm 	*tm;
+    int 	log_fd;
+
+    start_of_period = start_of_this_period(time_now, periodicity, period_multiple);
+    tm = localtime(&start_of_period);
+    strftime(pfilename, BUFSIZE, template, tm);
+    *pnext_period = start_of_next_period(start_of_period, periodicity, period_multiple) + period_delay;
+    
+    DEBUG(("%s (%d): using log file \"%s\" from %s (%d) until %s (%d) (for %d secs)\n",
+	   timestamp(time_now), time_now, pfilename, 
+           timestamp(start_of_period), start_of_period,
+	   timestamp(*pnext_period), *pnext_period,
+	   *pnext_period - time_now));
+    
+    log_fd = open(pfilename, O_WRONLY|O_CREAT|O_APPEND, FILE_MODE);
+    
+#ifndef DONT_CREATE_SUBDIRS
+    if ((log_fd < 0) && (errno == ENOENT))
+    {
+	create_subdirs(pfilename);
+	log_fd = open(pfilename, O_WRONLY|O_CREAT|O_APPEND, FILE_MODE);
+    }
+#endif	    
+
+    if (log_fd < 0)
+    {
+	perror(pfilename);
+	exit(2);
+    }
+
+    if (linkname)
+    {
+	create_link(pfilename, linkname, linktype, prevlinkname);
+    }
+    return log_fd;
+}
 
 /* Try to create missing directories on the path of filename.
  *

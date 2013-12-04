@@ -75,6 +75,7 @@
 
 /* Header files */
 
+#include "cronoconf.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -104,7 +105,6 @@
 # endif
 #endif
 
-#include "config.h"
 
 #ifdef _WIN32
 #define mode_t int
@@ -163,6 +163,11 @@ PERIODICITY;
 
 /* Function prototypes */
 
+int		new_log_file(const char *template, const char *linkname,
+			     mode_t linktype, const char *prevlinkname,
+			     PERIODICITY periodicity, int period_multiple, int period_delay,
+			     char *pfilename, size_t pfilename_len,
+			     time_t time_now, time_t *pnext_period);
 void		create_subdirs(char *);
 void		create_link(char *, const char *, mode_t, const char *);
 PERIODICITY	determine_periodicity(char *);

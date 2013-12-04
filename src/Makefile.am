@@ -4,8 +4,8 @@ sbin_PROGRAMS     = cronolog
 sbin_SCRIPTS      = cronosplit
 noinst_PROGRAMS   = cronotest
 
-cronolog_SOURCES  = cronolog.c  cronoutils.c cronoutils.h config.h
-cronotest_SOURCES = cronotest.c cronoutils.c cronoutils.h config.h
+cronolog_SOURCES  = cronolog.c  cronoutils.c cronoutils.h cronoconf.h
+cronotest_SOURCES = cronotest.c cronoutils.c cronoutils.h cronoconf.h
 
 INCLUDES          = -I../lib
 LDADD             = ../lib/libutil.a

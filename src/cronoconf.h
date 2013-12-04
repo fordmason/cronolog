@@ -16,9 +16,10 @@
  *
  */
 
-#ifndef _CONFIG_H_
-#define _CONFIG_H_
+#ifndef _CRONOCONFIG_H_
+#define _CRONOCONFIG_H_
 
+#include "config.h"
 
 /* Size of read buffer and filename buffer */
 

@@ -37,25 +37,25 @@ Major changes in release 1.5 (11-Apr-1997):
 * Fixed problem with change to daylight saving time (summer time).
 
 * Restructured to conform to GNU standards (now uses GNU automake and autoconf).
-
+
 Major changes in release 1.4 (20-Dec-1996):
 
 * Optimization of create_subdirs: don't bother stat'ing directories
   that form part of a common prefix with the last filename checked.
 
-
+
 Major changes in release 1.3 (16-Dec-1996):
 
 * Fixed portability bugs. 
 
-
+
 Major changes in release 1.2 (15-Dec-1996):
 
 * Creates missing directories as needed.
 
 * First version announced on comp.infosys.www.servers.unix (renamed to cronolog).
 
-   
+   
 Major changes in release 1.1 (09-Dec-1996):
 
 * Fixed problem with log files being created with the wrong dates.
@@ -69,7 +69,7 @@ Major changes in release 1.1 (09-Dec-1996):
 * Also added more comments and fixed handling of week numbers where
   weeks start on a Monday.
 
-
+
 Major changes in release 1.0 (06-Dec-1996):
 
 * Initial version sent to Apache developers' mailing list 

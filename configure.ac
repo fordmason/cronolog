@@ -19,23 +19,27 @@ dnl along with this program; if not, write to the Free Software
 dnl Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 dnl
-dnl $Id: configure.in,v 1.8 1999/12/20 09:03:50 andrew Exp $
+dnl $Id: configure.ac 1671 2003-07-05 07:19:51Z andrew $
 dnl
 
 
-AC_REVISION($Revision: 1.8 $)
+AC_REVISION($Id: configure.ac 1671 2003-07-05 07:19:51Z andrew $)
 
-AC_INIT(COPYING)
-AM_INIT_AUTOMAKE(cronolog, 1.6.2)	dnl  PACKAGE and VERSION initialized here!!
-AC_ARG_PROGRAM
+AC_INIT([cronolog],[1.6.3],[A.Ford@ford-mason.co.uk])
+AC_SUBST([PACKAGE_NAME])dnl
+AC_CONFIG_SRCDIR([bootstrap])
+AC_CONFIG_HEADERS(config.h)
+AC_CONFIG_AUX_DIR(config)
+AM_INIT_AUTOMAKE
 
 
 dnl Checks for programs.
 
 AC_PROG_CC
+AC_PROG_RANLIB
 AC_PROG_INSTALL
 AC_PROG_LN_S
-AC_PROG_RANLIB
+AC_PROG_MAKE_SET
 
 AC_PATH_PROG(PERL, perl, /usr/local/bin/perl, /usr/bin:/usr/local/bin:/opt/bin:/usr/contrib/bin)
 
@@ -49,19 +53,31 @@ AC_HEADER_STAT
 AC_HEADER_TIME
 AC_STRUCT_TM
 AC_STRUCT_TIMEZONE
-AC_CHECK_HEADERS(fcntl.h limits.h unistd.h)
+AC_CHECK_HEADERS([fcntl.h langinfo.h libintl.h limits.h locale.h stdlib.h string.h sys/time.h unistd.h])
+
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 
 AC_C_CONST
+AC_TYPE_MODE_T
+AC_TYPE_PID_T
 AC_TYPE_SIZE_T
 AC_STRUCT_TM
 
 dnl Checks for library functions.
 
+AC_FUNC_MALLOC
+AC_FUNC_MKTIME
+AC_FUNC_STAT
 AC_FUNC_STRFTIME
 AC_FUNC_VPRINTF
-AC_CHECK_FUNCS(mkdir mktime putenv)
+AC_CHECK_FUNCS([localtime_r memset mkdir nl_langinfo putenv strcasecmp strchr strncasecmp])
 AC_REPLACE_FUNCS(strptime localtime_r)
 
-AC_OUTPUT(Makefile lib/Makefile src/Makefile doc/Makefile testsuite/Makefile src/cronosplit)
+AC_CONFIG_FILES([Makefile
+		 cronolog.spec
+                 doc/Makefile
+                 lib/Makefile
+                 src/Makefile
+                 testsuite/Makefile])
+AC_OUTPUT
