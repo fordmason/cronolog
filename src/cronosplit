@@ -74,7 +74,7 @@
 use Getopt::Long;
 
 $program    = 'cronosplit';
-$version    = '1.6.1';
+$version    = '1.6.2';
 
 # Parameters
 
@@ -299,7 +299,7 @@ sub make_dirs
     
     # Strip off the filename bit
 
-    $path =~ s!/[^/]*$!!;
+    $path =~ s!/[^/]*$!! or return;
 
 
     # Return early if the directory exists

@@ -9,19 +9,7 @@
 cronolog \- write log messages to log files named according to a template
 
 .SH SYNOPSIS
-cronolog
-[-H NAME] [--hardlink=NAME]
-[-S NAME] [--symlink=NAME]
-[-l NAME] [--link=NAME]
-[-h]      [--help]
-[-o]      [--once-only]
-[-x FILE] [-x -] [--debug=FILE] [--debug==-]
-[-s TIME] [--start-time=TIME]
-[-e] [--european]
-[-a] [--american]
-[-V] [--version]
-
-.I template
+cronolog [\fIOPTION\fR]... \fItemplate\fR
 
 .SH DESCRIPTION
 .B cronolog
@@ -88,9 +76,36 @@ maintain a symbolic link from
 .I NAME
 to the current log file.
 .\"
+.IP "-P \fINAME\fP"
+.IP "--prevlink=\fINAME\fP"
+maintain a symbolic link from 
+.I NAME
+to the previous log file.  Requires that the
+.B "--symlink"
+option is specified, as cronolog renames the current link to the name
+specified for the previous link.
+.\"
 .IP -h
 .IP --help
 print a help message and then exit.
+.\"
+.IP "-p \fIPERIOD\fP"
+.IP "--period=\fIPERIOD\fP"
+specifies the period explicitly as an optional digit string followed
+by one of units: \fBseconds\fP, \fBminutes\fP, \fBhours\fP,
+\fBdays\fP, \fBweeks\fP or \fBmonths\fP.  The count cannot be greater
+than the number of units in the next larger unit, i.e. you cannot
+specify "120 minutes", and for seconds, minutes and hours the count
+must be a factor of the next higher unit, i.e you can specify 1, 2, 3,
+4, 5, 6, 10, 15, 20 or 30 minutes but not say 7 minutes.
+.\"
+.IP "-d \fIPERIOD\fP"
+.IP "--delay=\fIPERIOD\fP"
+specifies the delay from the start of the period before the log file
+is rolled over.  For example specifying (explicitly or implicitly) a
+period of 15 minutes and a delay of 5 minutes results in the log files
+being rotated at five past, twenty past, twentyfive to and ten to each
+hour.   The delay cannot be longer than the period.
 .\"
 .IP "-o"
 .IP "--once-only"

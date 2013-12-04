@@ -82,6 +82,8 @@
 			"\n"\
 			"   -a,    --american         American date formats\n" \
 			"   -e,    --european         European date formats (default)\n" \
+			"   -p PERIOD, --period=PERIOD set the rotation period explicitly\n" \
+			"   -d DELAY,  --delay=DELAY   set the rotation period delay\n" \
 			"   -s,    --start-time=TIME  starting time\n" \
 			"   -z TZ, --time-zone=TZ     use TZ for timezone\n" \
 			"   -h,    --help             print this help, then exit\n" \
@@ -98,13 +100,16 @@
 			"\n"
 
 
-char 		*short_options = "aes:z:hVvd";
+char 		*short_options = "ad:ep:s:z:hVvD";
 struct option   long_options[] =
 {
     { "american",	no_argument,		NULL, 'a' },
     { "european",	no_argument,		NULL, 'e' },
     { "start-time", 	required_argument,	NULL, 's' },
     { "time-zone",  	required_argument,	NULL, 'z' },
+    { "period",		required_argument,	NULL, 'p' },
+    { "delay",		required_argument,	NULL, 'd' },
+    { "test-subdirs",	required_argument,	NULL, 'D' },
     { "help",       	no_argument,		NULL, 'h' },
     { "version",	no_argument,		NULL, 'V' },
     { "verbose",	no_argument,		NULL, 'v' }
@@ -116,7 +121,10 @@ struct option   long_options[] =
 int
 main(int argc, char **argv, char **envp)
 {
-    PERIODICITY periodicity;
+    PERIODICITY periodicity = UNKNOWN;
+    PERIODICITY period_delay_units = UNKNOWN;
+    int		period_multiple = 1;
+    int		period_delay    = 0;
     int		use_american_date_formats = 0;
     time_t	time_now = time(NULL);
     struct tm 	*tm;
@@ -143,6 +151,24 @@ main(int argc, char **argv, char **envp)
 	    use_american_date_formats = 0;
 	    break;
 	    
+	case 'd':
+	    period_delay_units = parse_timespec(optarg, &period_delay);
+	    break;
+
+	case 'p':
+	    periodicity = parse_timespec(optarg, &period_multiple);
+	    if (   (periodicity == INVALID_PERIOD)
+		|| (periodicity == PER_SECOND) && (60 % period_multiple)
+		|| (periodicity == PER_MINUTE) && (60 % period_multiple)
+		|| (periodicity == HOURLY)     && (24 % period_multiple)
+		|| (periodicity == DAILY)      && (period_multiple > 365)
+		|| (periodicity == WEEKLY)     && (period_multiple > 52)
+		|| (periodicity == MONTHLY)    && (12 % period_multiple)) {
+		fprintf(stderr, "%s: invalid explicit period specification (%s)\n", argv[0], start_time);
+		exit(1);
+	    }		
+	    break;
+	    
 	case 's':
 	    start_time = optarg;
 	    break;
@@ -156,7 +182,7 @@ main(int argc, char **argv, char **envp)
 	    fprintf(stderr, VERSION_MSG, argv[0]);
 	    exit(0);
 	    
-	case 'd':
+	case 'D':
 	    test_subdir_creation++;
 	    break;
 	    
@@ -190,27 +216,41 @@ main(int argc, char **argv, char **envp)
     
     template = argv[optind++];
     n    = atoi(argv[optind]);
-    periodicity = determine_periodicity(template);
+    if (periodicity == UNKNOWN) {
+	periodicity = determine_periodicity(template);
+    }
 
-    printf("Rotation period is per %s\n", periods[periodicity]);
+
+    if (period_delay) {
+	if (   (period_delay_units > periodicity)
+	    || (   period_delay_units == periodicity
+		&& abs(period_delay)  >= period_multiple)) {
+	    fprintf(stderr, "%s: period delay cannot be larger than the rollover period\n", argv[0], start_time);
+	    exit(1);
+	}		
+	period_delay *= period_seconds[period_delay_units];
+    }
+
+    printf("Rotation period is per %d %s\n", period_multiple, periods[periodicity]);
 
     tm = localtime(&time_now);
     strftime(buf, sizeof (buf), "%c %Z", tm);
     printf("Start time is %s (%ld)\n", buf, time_now);
-    time_now = start_of_this_period(time_now, periodicity);
 
     for (i = 1; i <= n; i++)
     {
 	tm = localtime(&time_now);
 	strftime(buf, sizeof (buf), "%c %Z", tm);
 	printf("Period %d starts at %s (%ld):  ", i, buf, time_now);
+	time_now = start_of_this_period(time_now, periodicity, period_multiple);
+	tm = localtime(&time_now);
 	strftime(filename, MAX_PATH, template, tm);
 	printf("\"%s\"\n", filename);
 	if (test_subdir_creation)
 	{
 	    create_subdirs(filename);
 	}
-	time_now = start_of_next_period(time_now, periodicity);
+	time_now = start_of_next_period(time_now, periodicity, period_multiple) + period_delay;
     }
 
     return 0;

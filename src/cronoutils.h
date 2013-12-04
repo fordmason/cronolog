@@ -82,7 +82,12 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
+#ifndef _WIN32
 #include <unistd.h>
+#else
+#include <io.h>
+#include <direct.h>
+#endif
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -100,6 +105,16 @@
 #endif
 
 #include "config.h"
+
+#ifdef _WIN32
+#define mode_t int
+
+#define open  _open
+#define close _close
+#define read  _read
+#define write _write
+#define mkdir _mkdir
+#endif
 
 #if !HAVE_LOCALIME_R
 struct tm *localtime_r(const time_t *, struct tm *);
@@ -141,7 +156,7 @@ extern int optind, opterr, optopt;
 
 typedef enum 
 {
-    PER_SECOND, PER_MINUTE, HOURLY, DAILY, WEEKLY, MONTHLY, YEARLY, ONCE_ONLY, UNKNOWN
+    PER_SECOND, PER_MINUTE, HOURLY, DAILY, WEEKLY, MONTHLY, YEARLY, ONCE_ONLY, UNKNOWN, INVALID_PERIOD
 }
 PERIODICITY;
 
@@ -149,10 +164,11 @@ PERIODICITY;
 /* Function prototypes */
 
 void		create_subdirs(char *);
-void		create_link(char *, const char *, mode_t);
+void		create_link(char *, const char *, mode_t, const char *);
 PERIODICITY	determine_periodicity(char *);
-time_t		start_of_next_period(time_t, PERIODICITY);
-time_t		start_of_this_period(time_t, PERIODICITY);
+PERIODICITY 	parse_timespec(char *optarg, int *p_period_multiple);
+time_t		start_of_next_period(time_t, PERIODICITY, int);
+time_t		start_of_this_period(time_t, PERIODICITY, int);
 void		print_debug_msg(char *msg, ...);
 time_t		parse_time(char *time_str, int);
 char 		*timestamp(time_t thetime);
@@ -162,6 +178,7 @@ char 		*timestamp(time_t thetime);
 
 extern FILE	*debug_file;
 extern char	*periods[];
+extern int	period_seconds[];
 
 
 /* Usage message and DEBUG macro. 

@@ -88,34 +88,43 @@
 
 /* Forward function declaration */
 
-int	new_log_file(const char *, const char *, mode_t, 
-		     PERIODICITY, char *, size_t, time_t, time_t *);
+int	new_log_file(const char *, const char *, mode_t, const char *,
+		     PERIODICITY, int, int, char *, size_t, time_t, time_t *);
 
 
 /* Definition of version and usage messages */
 
+#ifndef _WIN32
 #define VERSION_MSG   	PACKAGE " version " VERSION "\n"
+#else
+#define VERSION_MSG      "cronolog version 0.1\n"
+#endif
 
 
 #define USAGE_MSG 	"usage: %s [OPTIONS] logfile-spec\n" \
 			"\n" \
-			"   -H NAME, --hardlink=NAME maintain a hard link from NAME to current log\n" \
-			"   -S NAME, --symlink=NAME  maintain a symbolic link from NAME to current log\n" \
-			"   -l NAME, --link=NAME     same as -S/--symlink\n" \
-			"   -h,      --help          print this help, then exit\n" \
-			"   -o,      --once-only     create single output log from template (not rotated)\n" \
-			"   -x FILE, --debug=FILE    write debug messages to FILE\n" \
-			"                            ( or to standard error if FILE is \"-\")\n" \
-			"   -a,    --american         American date formats\n" \
-			"   -e,    --european         European date formats (default)\n" \
-			"   -s,    --start-time=TIME  starting time\n" \
-			"   -z TZ, --time-zone=TZ     use TZ for timezone\n" \
-			"   -V,      --version       print version number, then exit\n"
+			"   -H NAME,   --hardlink=NAME maintain a hard link from NAME to current log\n" \
+			"   -S NAME,   --symlink=NAME  maintain a symbolic link from NAME to current log\n" \
+			"   -P NAME,   --prev-symlink=NAME  maintain a symbolic link from NAME to previous log\n" \
+			"   -l NAME,   --link=NAME     same as -S/--symlink\n" \
+			"   -h,        --help          print this help, then exit\n" \
+			"   -p PERIOD, --period=PERIOD set the rotation period explicitly\n" \
+			"   -d DELAY,  --delay=DELAY   set the rotation period delay\n" \
+			"   -o,        --once-only     create single output log from template (not rotated)\n" \
+			"   -x FILE,   --debug=FILE    write debug messages to FILE\n" \
+			"                              ( or to standard error if FILE is \"-\")\n" \
+			"   -a,        --american         American date formats\n" \
+			"   -e,        --european         European date formats (default)\n" \
+			"   -s,    --start-time=TIME   starting time\n" \
+			"   -z TZ, --time-zone=TZ      use TZ for timezone\n" \
+			"   -V,      --version         print version number, then exit\n"
 
 
 /* Definition of the short and long program options */
 
-char          *short_options = "aes:z:oH:S:l:hVx:";
+char          *short_options = "ad:eop:s:z:H:P:S:l:hVx:";
+
+#ifndef _WIN32
 struct option long_options[] =
 {
     { "american",	no_argument,		NULL, 'a' },
@@ -124,18 +133,25 @@ struct option long_options[] =
     { "time-zone",  	required_argument,	NULL, 'z' },
     { "hardlink",  	required_argument, 	NULL, 'H' },
     { "symlink",   	required_argument, 	NULL, 'S' },
+    { "prev-symlink",  	required_argument, 	NULL, 'P' },
     { "link",      	required_argument, 	NULL, 'l' },
+    { "period",		required_argument,	NULL, 'p' },
+    { "delay",		required_argument,	NULL, 'd' },
     { "once-only", 	no_argument,       	NULL, 'o' },
     { "help",      	no_argument,       	NULL, 'h' },
     { "version",   	no_argument,       	NULL, 'V' }
 };
-
+#endif
+
 /* Main function.
  */
 int
 main(int argc, char **argv)
 {
     PERIODICITY	periodicity = UNKNOWN;
+    PERIODICITY	period_delay_units = UNKNOWN;
+    int		period_multiple = 1;
+    int		period_delay  = 0;
     int		use_american_date_formats = 0;
     char 	read_buf[BUFSIZE];
     char 	tzbuf[BUFSIZE];
@@ -143,6 +159,7 @@ main(int argc, char **argv)
     char	*start_time = NULL;
     char	*template;
     char	*linkname = NULL;
+    char	*prevlinkname = NULL;
     mode_t	linktype = 0;
     int 	n_bytes_read;
     int		ch;
@@ -151,7 +168,11 @@ main(int argc, char **argv)
     time_t	next_period = 0;
     int 	log_fd = -1;
 
+#ifndef _WIN32
     while ((ch = getopt_long(argc, argv, short_options, long_options, NULL)) != EOF)
+#else
+    while ((ch = getopt(argc, argv, short_options)) != EOF)
+#endif        
     {
 	switch (ch)
 	{
@@ -180,7 +201,37 @@ main(int argc, char **argv)
 	case 'l':
 	case 'S':
 	    linkname = optarg;
+#ifndef _WIN32
 	    linktype = S_IFLNK;
+#endif        
+	    break;
+	    
+	case 'P':
+	    if (linkname == NULL)
+	    {
+		fprintf(stderr, "A current log symlink is needed to mantain a symlink to the previous log\n", argv[0]);
+		exit(1);
+	    }
+	    prevlinkname = optarg;
+	    break;
+	    
+
+	case 'd':
+	    period_delay_units = parse_timespec(optarg, &period_delay);
+	    break;
+
+	case 'p':
+	    periodicity = parse_timespec(optarg, &period_multiple);
+	    if (   (periodicity == INVALID_PERIOD)
+		|| (periodicity == PER_SECOND) && (60 % period_multiple)
+		|| (periodicity == PER_MINUTE) && (60 % period_multiple)
+		|| (periodicity == HOURLY)     && (24 % period_multiple)
+		|| (periodicity == DAILY)      && (period_multiple > 365)
+		|| (periodicity == WEEKLY)     && (period_multiple > 52)
+		|| (periodicity == MONTHLY)    && (12 % period_multiple)) {
+		fprintf(stderr, "%s: invalid explicit period specification (%s)\n", argv[0], start_time);
+		exit(1);
+	    }		
 	    break;
 	    
 	case 'o':
@@ -240,7 +291,19 @@ main(int argc, char **argv)
     }
 
 
-    DEBUG(("periodicity = %s\n", periods[periodicity]));
+    DEBUG(("periodicity = %d %s\n", period_multiple, periods[periodicity]));
+
+    if (period_delay) {
+	if (   (period_delay_units > periodicity)
+	    || (   period_delay_units == periodicity
+		&& abs(period_delay)  >= period_multiple)) {
+	    fprintf(stderr, "%s: period delay cannot be larger than the rollover period\n", argv[0], start_time);
+	    exit(1);
+	}		
+	period_delay *= period_seconds[period_delay_units];
+    }
+
+    DEBUG(("Rotation period is per %d %s\n", period_multiple, periods[periodicity]));
 
 
     /* Loop, waiting for data on standard input */
@@ -279,7 +342,8 @@ main(int argc, char **argv)
 	 */
 	if (log_fd < 0)
 	{
-	    log_fd = new_log_file(template, linkname, linktype, periodicity,
+	    log_fd = new_log_file(template, linkname, linktype, prevlinkname,
+				  periodicity, period_multiple, period_delay,
 				  filename, sizeof (filename), time_now, &next_period);
 	}
 
@@ -310,18 +374,19 @@ main(int argc, char **argv)
  * supplied.
  */
 int
-new_log_file(const char *template, const char *linkname, mode_t linktype,
-	     PERIODICITY periodicity, char *pfilename, size_t pfilename_len,
+new_log_file(const char *template, const char *linkname, mode_t linktype, const char *prevlinkname,
+	     PERIODICITY periodicity, int period_multiple, int period_delay,
+	     char *pfilename, size_t pfilename_len,
 	     time_t time_now, time_t *pnext_period)
 {
     time_t 	start_of_period;
     struct tm 	*tm;
     int 	log_fd;
 
-    start_of_period = start_of_this_period(time_now, periodicity);
+    start_of_period = start_of_this_period(time_now, periodicity, period_multiple);
     tm = localtime(&start_of_period);
     strftime(pfilename, BUFSIZE, template, tm);
-    *pnext_period = start_of_next_period(start_of_period, periodicity);
+    *pnext_period = start_of_next_period(start_of_period, periodicity, period_multiple) + period_delay;
     
     DEBUG(("%s (%d): using log file \"%s\" from %s (%d) until %s (%d) (for %d secs)\n",
 	   timestamp(time_now), time_now, pfilename, 
@@ -347,7 +412,7 @@ new_log_file(const char *template, const char *linkname, mode_t linktype,
 
     if (linkname)
     {
-	create_link(pfilename, linkname, linktype);
+	create_link(pfilename, linkname, linktype, prevlinkname);
     }
     return log_fd;
 }

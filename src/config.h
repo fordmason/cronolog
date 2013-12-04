@@ -33,7 +33,11 @@
 /* Default permissions for files and directories that are created */
 
 #ifndef FILE_MODE
+#ifndef _WIN32
 #define FILE_MODE	( S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH )
+#else
+#define FILE_MODE       ( _S_IREAD | _S_IWRITE )
+#endif
 #endif
 
 #ifndef DIR_MODE

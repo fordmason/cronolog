@@ -71,9 +71,11 @@
 
 #include "cronoutils.h"
 extern char *tzname[2];
-extern long int timezone;
 
 
+#ifdef _WIN32
+#include "strptime.h"
+#endif
 /* debug_file is the file to output debug messages to.  No debug
  * messages are output if it is set to NULL. 
  */
@@ -98,6 +100,19 @@ char	*periods[] =
     "month",
     "year",
     "aeon"	/* i.e. once only */
+};
+
+/* period_seconds[] is an array of the number of seconds in a period.
+ */
+int	period_seconds[] = 
+{
+    1,
+    60,
+    60 * 60,
+    60 * 60 * 24,
+    60 * 60 * 24 * 7,
+    60 * 60 * 24 * 31,
+    60 * 60 * 24 * 36
 };
 
 /* Try to create missing directories on the path of filename.
@@ -153,7 +168,11 @@ create_subdirs(char *filename)
 	    {
 		DEBUG(("Directory \"%s\" does not exist -- creating\n", dirname));
 		if ((mkdir(dirname, DIR_MODE) < 0) && (errno != EEXIST))
+#ifndef _WIN32
 		{
+#else
+                if ((mkdir(dirname) < 0) && (errno != EEXIST))
+#endif
 		    perror(dirname);
 		    exit(2);
 		}
@@ -170,15 +189,26 @@ create_subdirs(char *filename)
  * This function could do with more error checking! 
  */
 void
-create_link(char *pfilename, const char *linkname, mode_t linktype)
+create_link(char *pfilename, 
+	    const char *linkname, mode_t linktype,
+	    const char *prevlinkname)
 {
     struct stat		stat_buf;
     
+    if (stat(prevlinkname, &stat_buf) == 0)
+    {
+	unlink(prevlinkname);
+    }
     if (stat(linkname, &stat_buf) == 0)
     {
-	unlink(linkname);
+	if (prevlinkname) {
+	    rename(linkname, prevlinkname);
+	}
+	else {
+	    unlink(linkname);
+	}
     }
-
+#ifndef _WIN32
     if (linktype == S_IFLNK)
     {
 	symlink(pfilename, linkname);
@@ -187,8 +217,11 @@ create_link(char *pfilename, const char *linkname, mode_t linktype)
     {
 	link(pfilename, linkname);
     }
+#else
+    fprintf(stderr, "Creating link from %s to %s not supported", pfilename, linkname);
+#endif    
 }
-
+
 /* Examine the log file name specifier for strftime conversion
  * specifiers and determine the period between log files. 
  * Smallest period allowed is per minute.
@@ -291,6 +324,70 @@ determine_periodicity(char *spec)
     return periodicity;
 }
 
+/* 
+ */
+PERIODICITY 
+parse_timespec(char *optarg, int *p_period_multiple)
+{
+    PERIODICITY		periodicity	= INVALID_PERIOD;
+    int			period_multiple = 1;
+    char 		*p = optarg;
+    
+    /* Skip leading whitespace */
+    
+    while (isspace(*p)) { p++; }
+    
+    
+    /* Parse a digit string */
+    
+    if (isdigit(*p)) {
+	period_multiple = *p++ - '0';
+	
+	while (isdigit(*p)) {
+	    period_multiple *= 10;
+	    period_multiple += (*p++ - '0');
+	}
+    }
+
+    
+    /* Skip whitespace */
+
+    while (isspace(*p)) { p++; }
+    
+    if (strncasecmp(p, "sec", 3) == 0) {
+	if (period_multiple < 60) {
+	    periodicity = PER_SECOND;
+	}
+    }
+    else if (strncasecmp(p, "min", 3) == 0) {
+	if (period_multiple < 60) {
+	    periodicity = PER_MINUTE;
+	}
+    }
+    else if (strncasecmp(p, "hour", 4) == 0) {
+	if (period_multiple < 24) {
+	    periodicity = HOURLY;
+	}
+    }
+    else if (strncasecmp(p, "day", 3) == 0) {
+	if (period_multiple <= 31) {
+	    periodicity = DAILY;
+	}
+    }
+    else if (strncasecmp(p, "week", 4) == 0) {
+	if (period_multiple < 53) {
+	    periodicity = WEEKLY;
+	}
+    }
+    else if (strncasecmp(p, "mon", 3) == 0) {
+	if (period_multiple <= 12) {
+	    periodicity = MONTHLY;
+	}
+    }
+    *p_period_multiple = period_multiple;
+    return periodicity;
+}
+
 /* To determine the time of the start of the next period add just
  * enough to move beyond the start of the next period and then
  * determine the time of the start of that period.
@@ -299,7 +396,7 @@ determine_periodicity(char *spec)
  * time occurs during the current period. 
  */
 time_t
-start_of_next_period(time_t time_now, PERIODICITY periodicity)
+start_of_next_period(time_t time_now, PERIODICITY periodicity, int period_multiple)
 {
     time_t	start_time;
     
@@ -322,11 +419,11 @@ start_of_next_period(time_t time_now, PERIODICITY periodicity)
 	break;
 	
     case HOURLY:
-	start_time = time_now + SECS_PER_HOUR + LEAP_SECOND_ALLOWANCE;
+	start_time = time_now + period_multiple * SECS_PER_HOUR + LEAP_SECOND_ALLOWANCE;
 	break;
 
     case PER_MINUTE:
-	start_time = time_now + SECS_PER_MIN + LEAP_SECOND_ALLOWANCE;
+	start_time = time_now + period_multiple * SECS_PER_MIN + LEAP_SECOND_ALLOWANCE;
 	break;
 
     case PER_SECOND:
@@ -337,7 +434,7 @@ start_of_next_period(time_t time_now, PERIODICITY periodicity)
 	start_time = FAR_DISTANT_FUTURE;
 	break;
     }
-    return start_of_this_period(start_time, periodicity);
+    return start_of_this_period(start_time, periodicity, period_multiple);
 }
 
 /* Determine the time of the start of the period containing a given time.
@@ -348,14 +445,26 @@ start_of_next_period(time_t time_now, PERIODICITY periodicity)
  * saving time.
  */
 time_t
-start_of_this_period(time_t start_time, PERIODICITY periodicity)
+start_of_this_period(time_t start_time, PERIODICITY periodicity, int period_multiple)
 {
     struct tm	tm_initial;
     struct tm	tm_adjusted;
     int		expected_mday;
     
+#ifndef _WIN32
     localtime_r(&start_time, &tm_initial);
+#else
+    struct tm * tempTime;
+    
+    tempTime = localtime(&start_time);
+    if (NULL != tempTime)
+    {
+        memcpy(&tm_initial, tempTime, sizeof(struct tm));
 
+        free(tempTime);
+        tempTime = NULL;
+    }
+#endif    
     switch (periodicity)
     {
     case YEARLY:
@@ -411,8 +520,18 @@ start_of_this_period(time_t start_time, PERIODICITY periodicity)
 	 * adjusted back to the previous day so add 24 hours worth of
 	 * seconds.  
 	 */
-
+#ifndef _WIN32
 	localtime_r(&start_time, &tm_adjusted);    
+#else
+	tempTime = localtime(&start_time);
+	if (NULL != tempTime)
+	{
+	    memcpy(&tm_adjusted, tempTime, sizeof(struct tm));
+	    
+	    free(tempTime);
+	    tempTime = NULL;
+	}
+#endif    
 	if (   (tm_adjusted.tm_hour != 0)
 	    || (tm_adjusted.tm_min  != 0)
 	    || (tm_adjusted.tm_sec  != 0))
@@ -443,10 +562,18 @@ start_of_this_period(time_t start_time, PERIODICITY periodicity)
 
     case HOURLY:
 	start_time -= (tm_initial.tm_sec + tm_initial.tm_min * SECS_PER_MIN);
+	if (period_multiple > 1) {
+	    start_time -= SECS_PER_HOUR * (tm_initial.tm_hour -
+					   period_multiple * (tm_initial.tm_hour / period_multiple));
+	}
 	break;
 
     case PER_MINUTE:
 	start_time -= tm_initial.tm_sec;
+	if (period_multiple > 1) {
+	    start_time -= SECS_PER_MIN * (tm_initial.tm_min -
+					  period_multiple * (tm_initial.tm_min / period_multiple));
+	}
 	break;
 
     case PER_SECOND:	/* No adjustment needed */
@@ -476,7 +603,7 @@ mktime_from_utc(struct tm *t)
  * of the string.
  */
 static int
-check_end(char *p)
+check_end(const char *p)
 {
    if (!p)
       return 0;
@@ -543,7 +670,7 @@ parse_time(char *time_str, int use_american_date_formats)
 	*date_formats;
 	date_formats++)
    {
-       if (check_end(strptime(time_str, *date_formats, &tm)))
+       if (check_end((const char *)strptime(time_str, *date_formats, &tm)))
 	   return mktime_from_utc(&tm);
    }
    
