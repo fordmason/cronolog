@@ -1,0 +1,152 @@
+.TH cronolog 1 "December 1996"
+.\" $Id: cronolog.1,v 1.2 1996/12/15 15:34:44 andrew Exp $
+.\" Copyright (c) 1996 Andrew Ford.  All rights reserved.
+.\" The file LICENSE specifies the terms and conditions for redistribution.
+.SH NAME
+cronolog \- write log messages to log files named according to a template
+.SH SYNOPSIS
+.B cronolog
+.I template
+.SH DESCRIPTION
+.B cronolog
+is a simple program that reads log messages from its input and writes
+them to a set of output files, the names of which are constructed
+using
+.B template
+and the current date and time.  The template uses the same format
+specifiers as the Unix
+.BR date (1)
+command (which are the same as the standard C strftime library
+function).  
+.PP
+Before writing a message
+.B cronolog
+checks the time to see whether the current log file is still valid and
+if not it closes the current file, expands the template using the
+current date and time to generate a new file name, opens the new file
+(creating missing directories on the path of the new log file as
+needed unless the program is compiled with -DDONT_CREATE_SUBDIRS) and
+calculates the time at which the new file will become invalid.
+.PP
+.B cronolog
+is intended to be used in conjunction with a Web server, such as
+Apache to split the access log into daily or monthly logs.  For
+example the Apache configuration directives:
+.LP
+        TransferLog "|/www/sbin/cronolog /www/logs/%Y/%m/%d/access.log"
+        ErrorLog    "|/www/sbin/cronolog /www/logs/%Y/%m/%d/errors.log"
+.LP
+would instruct Apache to pipe its access and error log messages into
+separate copies of cronolog, which would create new log files each day
+in a directory hierarchy structured by date, i.e. on 31 December 1996
+messages would be written to
+.LP
+        /www/logs/1996/12/31/access.log
+        /www/logs/1996/12/31/errors.log
+.P
+after midnight the files
+.LP
+        /www/logs/1997/01/01/access.log
+        /www/logs/1997/01/01/errors.log
+.P
+would be used, with the directories 1997, 1997/01 and 1997/01/01 being
+created if they did not already exist.
+.SS Template format
+Each character in the template represents a character in the expanded
+filename, except for date and time format specifiers, which are
+replaced by their expansion.  Format specifiers consist of a `%'
+followed by one of the following characters:
+.IP %
+a literal % character
+.IP n
+a new-line character
+.IP t
+a horizontal tab character
+.PP
+Time fields:
+.IP H
+hour (00..23)
+.IP I
+hour (01..12)
+.IP p
+the locale's AM or PM indicator
+.IP M
+minute (00..59)
+.IP S
+second (00..61, which allows for leap seconds)
+.IP X
+the locale's time representation (e.g.: "15:12:47")
+.IP Z
+time zone (e.g. GMT), or nothing if the time zone cannot be determined
+.PP
+Date fields:
+.IP a
+the locale's abbreviated weekday name (e.g.: Sun..Sat)
+.IP A
+the locale's full weekday name (e.g.: Sunday .. Saturday)
+.IP b
+the locale's abbreviated month name (e.g.: Jan .. Dec)
+.IP B
+the locale's full month name, (e.g.: January .. December)
+.IP c
+the locale's date and time (e.g.: "Sun Dec 15 14:12:47 GMT 1996")
+.IP d
+day of month (01 .. 31)
+.IP j
+day of year (001 .. 366)
+.IP m
+month (01 .. 12)
+.IP U
+week of the year with Sunday as first day of week (00..53, where week
+1 is the week containing the first Sunday of the year)
+.IP W
+week of the year with Monday as first day of week (00..53, where week
+1 is the week containing the first Monday of the year)
+.IP w
+day of week (0 .. 6, where 0 corresponds to Sunday)
+.IP x
+locale's date representation (e.g. today in Britain: "15/12/96")
+.IP y
+year without the century (00 .. 99)
+.IP Y
+year with the century (1970 .. 2038)
+.P
+Other specifiers may be available depending on the C library's
+implementation of the
+.B strftime
+function.
+.P
+.SH SEE ALSO
+.BR apache (1m)
+.BR date (1)
+.BR strftime (3)
+.BR environ (5)
+.PP
+More information and the latest version of 
+.B cronolog 
+can be obtained from
+.LP
+        http://www.nhbs.co.uk/aford/resources/apache/cronolog/
+.LP
+If you have any suggestions, bug reports, fixes, or enhancements,
+please mail them to the author.
+.SS More about Apache
+Documentation for the Apache http server is available from
+.LP
+        http://www.apache.org
+.SH FUTURE DIRECTIONS
+The functionality of
+.B cronolog
+could be built into Apache, thus saving the overhead of having a
+process per log stream and that of transferring data from the server
+process to the cronolog process.  The main complication is handling
+the case where multiple log streams are written to the same file
+(template), for example where different virtual servers write to the
+same set of log files.
+.SH AUTHOR
+Andrew Ford <andrew@icarus.demon.co.uk> (http://www.nhbs.co.uk/aford).
+.LP
+.B cronolog
+is based on a program called
+.B rotatelogs
+by Ben Laurie, which is packaged with the Apache web server.

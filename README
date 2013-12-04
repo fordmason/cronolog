@@ -1,0 +1,150 @@
+CRONOLOG
+
+"cronolog" is a simple program that reads log messages from its input
+and writes them to a set of output files, the names of which are
+constructed using template and the current date and time.  The
+template uses the same format specifiers as the Unix date command
+(which are the same as the standard C strftime library function).
+
+"cronolog" is intended to be used in conjunction with a Web server, such
+as Apache to split the access log into daily or monthly logs. For
+example the Apache configuration directives:
+
+	TransferLog "|/www/sbin/cronolog /www/logs/%Y/%m/%d/access.log"
+	ErrorLog    "|/www/sbin/cronolog /www/logs/%Y/%m/%d/errors.log"
+
+would instruct Apache to pipe its access and error log messages into
+separate copies of cronolog, which would create new log files each day
+in a directory hierarchy structured by date, i.e. on 31 December 1996
+messages would be written to
+
+	/www/logs/1996/12/31/access.log
+	/www/logs/1996/12/31/errors.log
+
+after midnight the files
+
+	/www/logs/1997/01/01/access.log
+	/www/logs/1997/01/01/errors.log
+
+would be used, with the directories 1997, 1997/01 and 1997/01/01 being
+created if they did not already exist.
+
+Each character in the template represents a character in the expanded
+filename, except for date and time format specifiers, which are
+replaced by their expansion.  Format specifiers consist of a `%'
+followed by one of the following characters:
+
+ %	a literal % character
+ n	a new-line character
+ t	a horizontal tab character
+
+Time fields:
+
+ H 	hour (00..23)
+ I 	hour (01..12)
+ p 	the locale's AM or PM indicator
+ M 	minute (00..59)
+ S 	second (00..61, which allows for leap seconds)
+ X 	the locale's time representation (e.g.: "15:12:47")
+ Z 	time zone (e.g. GMT), or nothing if the time zone cannot be determined
+
+Date fields:
+
+ a 	the locale's abbreviated weekday name (e.g.: Sun..Sat)
+ A 	the locale's full weekday name (e.g.: Sunday .. Saturday)
+ b 	the locale's abbreviated month name (e.g.: Jan .. Dec)
+ B 	the locale's full month name, (e.g.: January .. December)
+ c 	the locale's date and time (e.g.: "Sun Dec 15 14:12:47 GMT 1996")
+ d 	day of month (01 .. 31)
+ j 	day of year (001 .. 366)
+ m 	month (01 .. 12)
+ U 	week of the year with Sunday as first day of week (00..53, where
+	week 1 is the week containing the first Sunday of the year)
+ W 	week of the year with Monday as first day of week (00..53, where
+	week 1 is the week containing the first Monday of the year)
+ w 	day of week (0 .. 6, where 0 corresponds to Sunday)
+ x 	locale's date representation (e.g. today in Britain: "15/12/96")
+ y 	year without the century (00 .. 99)
+ Y 	year with the century (1970 .. 2038)
+
+Other specifiers may be available depending on the C library's
+implementation of the strftime function.  Before writing a message
+cronolog checks the time to see whether the current log file is still
+valid and if not it closes the current file, expands the template
+using the current date and time to generate a new file name, opens the
+new file (creating missing directories on the path of the new log file
+as needed unless the program is compiled with -DDONT_CREATE_SUBDIRS)
+and calculates the time at which the new file will become invalid.
+
+
+INSTALLATION
+
+Examine Makefile, set CC and CFLAGS and type "make".
+
+CFLAGS can usefully include any of the following:
+
+	-DFILE_MODE=octal-number	mode used for creating files (default is 0664)
+	-DDIR_MODE=octal-number		mode used for creating directories (default is 0775)
+	-DDONT_CREATE_SUBDIRS		don't include code to create missing directories
+	-DNEED_GETOPT_DEFS		if your platform doesn't declare getopt()
+	-DDEBUG				enable debugging code
+
+If it includes -DTESTHARNESS, then a simple test harness program is
+compiled, which tests out the lower level functions and prints out
+debugging information.  The test program is run with the command line:
+
+	testharness [-d] "template" count
+
+template is the filename template and count is the number of periods
+to evaluate, for example:
+
+	$ testharness "%Y/%m/%d/access.log" 4
+	Determining periodicity of "%Y/%m/%d/access.log"
+	%Y -> yearly
+	%m -> monthly
+	%d -> daily
+	Rotation period is per day
+	Start time is Sun Dec 15 15:55:43 1996 (850665343)
+	Period   1 starts at Sun Dec 15 00:00:00 1996 (850608000):  "1996/12/15/access.log"
+	Period   2 starts at Mon Dec 16 00:00:00 1996 (850694400):  "1996/12/16/access.log"
+	Period   3 starts at Tue Dec 17 00:00:00 1996 (850780800):  "1996/12/17/access.log"
+	Period   4 starts at Wed Dec 18 00:00:00 1996 (850867200):  "1996/12/18/access.log"
+
+Specifying the flag -d instructs the test program to create missing
+subdirectories, for example, having created a directory 1996:
+
+	$ testharness -d  "%Y/%m/%d/access.log" 4
+	Determining periodicity of "%Y/%m/%d/access.log"
+	%Y -> yearly
+	%m -> monthly
+	%d -> daily
+	Rotation period is per day
+	Start time is Sun Dec 15 16:00:21 1996 (850665621)
+	Period   1 starts at Sun Dec 15 00:00:00 1996 (850608000):  "1996/12/15/access.log"
+	Creating missing components of 1996/12/15/access.log
+	Testing directory "1996"
+	Testing directory "1996/12"
+	Directory "1996/12" does not exist -- creating
+	Testing directory "1996/12/15"
+	Directory "1996/12/15" does not exist -- creating
+	Period   2 starts at Mon Dec 16 00:00:00 1996 (850694400):  "1996/12/16/access.log"
+	Creating missing components of 1996/12/16/access.log
+	Initial prefix "1996" known to exist
+	Initial prefix "1996/12" known to exist
+	Testing directory 1996/12/16
+	Directory "1996/12/16" does not exist -- creating
+	Period   3 starts at Tue Dec 17 00:00:00 1996 (850780800):  "1996/12/17/access.log"
+	Creating missing components of 1996/12/17/access.log
+	Initial prefix "1996" known to exist
+	Initial prefix "1996/12" known to exist
+	Testing directory 1996/12/17
+	Directory "1996/12/17" does not exist -- creating
+	Period   4 starts at Wed Dec 18 00:00:00 1996 (850867200):  "1996/12/18/access.log"
+	Creating missing components of 1996/12/18/access.log
+	Initial prefix "1996" known to exist
+	Initial prefix "1996/12" known to exist
+	Testing directory 1996/12/18
+	Directory "1996/12/18" does not exist -- creating
+
+
+To install simply copy the executable "cronolog" to a suitable directory.

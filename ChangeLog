@@ -1,0 +1,14 @@
+Fri Dec 20 11:05:59 1996  Andrew Ford  <andrew@icarus.demon.co.uk>
+
+	* Version 1.4 released -- optimized create_subdirs to avoid
+	  unnecessary calls to stat().  Updated documentation and comments.
+
+Mon Dec 16 09:30:04 1996  Andrew Ford  <andrew@icarus.demon.co.uk>
+
+	* Version 1.3 released -- fixed portability bugs
+	* cronolog.c: added extra includes and NEED_GETOPT_DEFS flag
+
+Sun Dec 15 12:30:03 1996  Andrew Ford  <andrew@icarus.demon.co.uk>
+
+	* First version (1.2) ready for release.
+
