@@ -1,3 +1,10 @@
+1999-12-16  Andrew Ford  <andrew@icarus.demon.co.uk>
+
+	* New version 1.6
+	* patch from Charles Thayer <thayer@mediabridge.com> to fix
+	  a bug whereby if cronolog is started shortly before the end of a 
+	  period it will not rotate until the end of the next period.
+
 Thu Jun  4 15:48:01 1998  Andrew Ford  <andrew@icarus.demon.co.uk>
 
 	* Bumped beta version number to 1.5b9

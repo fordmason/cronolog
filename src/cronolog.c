@@ -1,16 +1,16 @@
 /*
  * cronolog -- simple program to rotate Apache logs without having to kill the server.
- * $Id: cronolog.c,v 1.6 1998/03/10 10:58:39 andrew Exp $
+ * $Id: cronolog.c,v 1.7 1999/12/16 18:32:06 andrew Exp $
  *
  * Copyright (C) 1996-1998 by Andrew Ford and Ford & Mason Ltd
- *	mailto:andrew@icarus.demon.co.uk
- * 	http://www.nhbs.co.uk/aford/
+ *	mailto:A.Ford@ford-mason.co.uk
+ * 	http://www.ford-mason.co.uk/
  *
  * The file LICENSE specifies the terms and conditions for redistribution.
  *
  * The latest version of cronolog can be found at:
  *
- *	http://www.nhbs.co.uk/aford/resources/apache/cronolog/
+ *	http://www.ford-mason.co.uk/resources/cronolog/
  *
  * cronolog is loosly based on the rotatelogs program, which is part of the
  * Apache package written by Ben Laurie <ben@algroup.co.uk>
@@ -41,7 +41,7 @@ int	new_log_file(const char *, const char *, mode_t,
 
 #define VERSION_MSG   	PACKAGE " version " VERSION "\n" \
 			"\n" \
-			"Copyright (C) 1997, 1998 Ford & Mason Ltd.\n" \
+			"Copyright (C) 1996-1999 Ford & Mason Ltd.\n" \
 			"This is free software; see the source for copying conditions.\n" \
 			"There is NO warranty; not even for MERCHANTABILITY or FITNESS\n" \
 			"FOR A PARTICULAR PURPOSE.\n" \
@@ -277,10 +277,11 @@ new_log_file(const char *template, const char *linkname, mode_t linktype,
     start_of_period = start_of_this_period(time_now, periodicity);
     tm = localtime(&start_of_period);
     strftime(pfilename, BUFSIZE, template, tm);
-    *pnext_period = start_of_next_period(time_now, periodicity);
+    *pnext_period = start_of_next_period(start_of_period, periodicity);
     
-    DEBUG(("%s (%d): using log file \"%s\" until %s (%d) (for %d secs)\n",
+    DEBUG(("%s (%d): using log file \"%s\" from %s (%d) until %s (%d) (for %d secs)\n",
 	   timestamp(time_now), time_now, pfilename, 
+           timestamp(start_of_period), start_of_period,
 	   timestamp(*pnext_period), *pnext_period,
 	   *pnext_period - time_now));
     

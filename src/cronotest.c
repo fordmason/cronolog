@@ -1,6 +1,6 @@
 /*
  * cronotest -- test harness for cronoutils
- * $Id: cronotest.c,v 1.5 1998/03/10 10:58:40 andrew Exp $
+ * $Id: cronotest.c,v 1.6 1999/12/16 18:32:06 andrew Exp $
  *
  * Copyright (C) 1997 by Ford & Mason Ltd.
  * 
@@ -68,7 +68,7 @@ struct option   long_options[] =
 /* Test harness for determine_periodicity and start_of_this/next_period
  */
 int
-main(int argc, char **argv)
+main(int argc, char **argv, char **envp)
 {
     PERIODICITY periodicity;
     int		use_american_date_formats = 0;
@@ -76,7 +76,7 @@ main(int argc, char **argv)
     struct tm 	*tm;
     char	*start_time = NULL;
     char	*template;
-    char	ch;
+    int		ch;
     int		n;
     int		i;
     char	buf[BUFSIZE];
@@ -149,7 +149,7 @@ main(int argc, char **argv)
     printf("Rotation period is per %s\n", periods[periodicity]);
 
     tm = localtime(&time_now);
-    strftime(buf, sizeof (buf), "%c", tm);
+    strftime(buf, sizeof (buf), "%c %Z", tm);
     printf("Start time is %s (%ld)\n", buf, time_now);
     time_now = start_of_this_period(time_now, periodicity);
 

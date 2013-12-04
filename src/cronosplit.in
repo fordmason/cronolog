@@ -1,7 +1,7 @@
 #!@PERL@ -- 		# -*- perl -*-
 #
 # cronosplit -- split log files into cronolog-compatible logs
-# $Id: cronosplit.in,v 1.4 1998/03/08 11:30:20 andrew Exp $
+# $Id: cronosplit.in,v 1.5 1999/12/16 18:32:06 andrew Exp $
 #
 # Copyright (C) 1997  Ford & Mason Ltd
 # Written by Andrew Ford
@@ -114,17 +114,33 @@ EOS
 }
 
 
+
 # Process each input file specified
 
- FILE:
-foreach $file (@ARGV)
-{
-    print STDERR "opening \"$file\"\n" if $verbose;
+push(@ARGV, "-") unless @ARGV;
 
-    if (! open(INFILE, $file))
-    {
-	print STDERR "cannot open \"$file\"\n";
-	next FILE;
+
+ FILE:
+foreach $file (@ARGV) {
+    if ($file eq "-") {
+	print STDERR "reading from STDIN\n" if $verbose;
+	*INFILE = *STDIN;
+    } 
+    elsif ($file =~ /\.gz$/) {
+	print STDERR "opening \"$file\"\n" if $verbose;
+	
+	if (!open(INFILE, "zcat $file|")) {
+	    print STDERR "cannot open \"$file\"\n";
+	    next FILE;
+	}
+    }
+    else {
+	print STDERR "opening \"$file\"\n" if $verbose;
+	
+	if (! open(INFILE, $file)) {
+	    print STDERR "cannot open \"$file\"\n";
+	    next FILE;
+	}
     }
 
 

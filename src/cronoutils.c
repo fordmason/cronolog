@@ -1,6 +1,6 @@
 /*
  * cronoutils -- utilities for the cronolog program
- * $Id: cronoutils.c,v 1.7 1998/03/10 10:58:40 andrew Exp $
+ * $Id: cronoutils.c,v 1.8 1999/12/16 18:32:06 andrew Exp $
  *
  * Copyright (C) 1996, 1997 by Ford & Mason Ltd.
  *
@@ -17,6 +17,8 @@
  */
 
 #include "cronoutils.h"
+extern char *tzname[2];
+extern long int timezone;
 
 
 /* debug_file is the file to output debug messages to.  No debug
@@ -485,7 +487,7 @@ parse_time(char *time_str, int use_american_date_formats)
    for (date_formats = (use_american_date_formats
 			? american_date_formats
 			: european_date_formats);
-	date_formats;
+	*date_formats;
 	date_formats++)
    {
        if (check_end(strptime(time_str, *date_formats, &tm)))
