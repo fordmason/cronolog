@@ -19,14 +19,14 @@ dnl along with this program; if not, write to the Free Software
 dnl Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 dnl
-dnl $Id: configure.in,v 1.7 1999/12/16 18:52:46 andrew Exp $
+dnl $Id: configure.in,v 1.8 1999/12/20 09:03:50 andrew Exp $
 dnl
 
 
-AC_REVISION($Revision: 1.7 $)
+AC_REVISION($Revision: 1.8 $)
 
 AC_INIT(COPYING)
-AM_INIT_AUTOMAKE(cronolog, 1.6)	dnl  PACKAGE and VERSION initialized here!!
+AM_INIT_AUTOMAKE(cronolog, 1.6.1)	dnl  PACKAGE and VERSION initialized here!!
 AC_ARG_PROGRAM
 
 

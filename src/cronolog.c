@@ -1,16 +1,71 @@
+/* ====================================================================
+ * Copyright (c) 1995-1999 The Apache Group.  All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer. 
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * 3. All advertising materials mentioning features or use of this
+ *    software must display the following acknowledgment:
+ *    "This product includes software developed by the Apache Group
+ *    for use in the Apache HTTP server project (http://www.apache.org/)."
+ *
+ * 4. The names "Apache Server" and "Apache Group" must not be used to
+ *    endorse or promote products derived from this software without
+ *    prior written permission. For written permission, please contact
+ *    apache@apache.org.
+ *
+ * 5. Products derived from this software may not be called "Apache"
+ *    nor may "Apache" appear in their names without prior written
+ *    permission of the Apache Group.
+ *
+ * 6. Redistributions of any form whatsoever must retain the following
+ *    acknowledgment:
+ *    "This product includes software developed by the Apache Group
+ *    for use in the Apache HTTP server project (http://www.apache.org/)."
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE APACHE GROUP ``AS IS'' AND ANY
+ * EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE APACHE GROUP OR
+ * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ * ====================================================================
+ *
+ * This software consists of voluntary contributions made by many
+ * individuals on behalf of the Apache Group and was originally based
+ * on public domain software written at the National Center for
+ * Supercomputing Applications, University of Illinois, Urbana-Champaign.
+ * For more information on the Apache Group and the Apache HTTP server
+ * project, please see <http://www.apache.org/>.
+ *
+ */
 /*
- * cronolog -- simple program to rotate Apache logs without having to kill the server.
- * $Id: cronolog.c,v 1.7 1999/12/16 18:32:06 andrew Exp $
+ * cronolog -- simple Apache log rotation program
  *
- * Copyright (C) 1996-1998 by Andrew Ford and Ford & Mason Ltd
- *	mailto:A.Ford@ford-mason.co.uk
- * 	http://www.ford-mason.co.uk/
+ * Copyright (c) 1996-1999 by Ford & Mason Ltd
  *
- * The file LICENSE specifies the terms and conditions for redistribution.
+ * This software was submitted by Ford & Mason Ltd to the Apache
+ * Software Foundation in December 1999.  Future revisions and
+ * derivatives of this source code must acknowledge Ford & Mason Ltd
+ * as the original contributor of this module.  All other licensing
+ * and usage conditions are those of the Apache Software Foundation.
  *
- * The latest version of cronolog can be found at:
- *
- *	http://www.ford-mason.co.uk/resources/cronolog/
+ * Originally written by Andrew Ford <A.Ford@ford-mason.co.uk>
  *
  * cronolog is loosly based on the rotatelogs program, which is part of the
  * Apache package written by Ben Laurie <ben@algroup.co.uk>
@@ -39,18 +94,7 @@ int	new_log_file(const char *, const char *, mode_t,
 
 /* Definition of version and usage messages */
 
-#define VERSION_MSG   	PACKAGE " version " VERSION "\n" \
-			"\n" \
-			"Copyright (C) 1996-1999 Ford & Mason Ltd.\n" \
-			"This is free software; see the source for copying conditions.\n" \
-			"There is NO warranty; not even for MERCHANTABILITY or FITNESS\n" \
-			"FOR A PARTICULAR PURPOSE.\n" \
-			"\n" \
-			"Written by Andrew Ford <A.Ford@ford-mason.co.uk>\n" \
-			"\n" \
-			"The latest version can be found at:\n" \
-			"\n" \
-			"    http://www.ford-mason.co.uk/resources/cronolog/\n"
+#define VERSION_MSG   	PACKAGE " version " VERSION "\n"
 
 
 #define USAGE_MSG 	"usage: %s [OPTIONS] logfile-spec\n" \

@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# From configure.in Revision: 1.7 
+# From configure.in Revision: 1.8 
 
 
 
@@ -714,7 +714,7 @@ fi
 
 PACKAGE=cronolog
 
-VERSION=1.6
+VERSION=1.6.1
 
 if test "`cd $srcdir && pwd`" != "`pwd`" && test -f $srcdir/config.status; then
   { echo "configure: error: source directory already configured; run "make distclean" there first" 1>&2; exit 1; }
