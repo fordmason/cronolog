@@ -1,0 +1,139 @@
+.\" -*- nroff -*-
+.\" $Id: cronosplit.1m,v 1.3 1998/03/08 11:27:29 andrew Exp $
+.\" Copyright (c) 1997-1998 Andrew Ford and Ford & Mason Ltd.
+.\" The file LICENSE specifies the terms and conditions for redistribution.
+.\"
+.TH cronosplit 1m "March 1998"
+.\"
+.SH NAME
+cronosplit \- split log files into cronolog-compatible files
+.\"
+.SH SYNOPSIS
+.B cronosplit
+--template=TEMPLATE [--print-invalid] [--help] [--version] file ...
+.\"
+.SH DESCRIPTION
+.B cronosplit
+is a simple program that reads lines from a set of input log files,
+which must be in
+.I "Common Log Format"
+and write each lines to an output files, the name of which is
+constructed using the
+.B template
+specified and timestamp from the the line.  The template uses the same
+format specifiers as the Unix
+.BR date (1)
+command (which are the same as the standard C strftime library
+function).
+.\"
+.SH Options
+.C cronosplit
+accepts the following options and arguments:
+.IP "--template=\fITEMPLATE\fP"
+specifies the template for the output log files (using the format
+specifiers described below).
+.IP "--verbose"
+print additional status messages to the standard error stream.
+.IP "--debug"
+print debug messages to the standard error stream.
+.IP "--help"
+print a help message and then exit.
+.IP "--version"
+print version information and exit.
+.\"
+.SH Template format
+Each character in the template represents a character in the expanded
+filename, except for date and time format specifiers, which are
+replaced by their expansion.  Format specifiers consist of a `%'
+followed by one of the following characters:
+.IP %
+a literal % character
+.IP n
+a new-line character
+.IP t
+a horizontal tab character
+.PP
+Time fields:
+.IP H
+hour (00..23)
+.IP I
+hour (01..12)
+.IP p
+the locale's AM or PM indicator
+.IP M
+minute (00..59)
+.IP S
+second (00..61, which allows for leap seconds)
+.IP X
+the locale's time representation (e.g.: "15:12:47")
+.IP Z
+time zone (e.g. GMT), or nothing if the time zone cannot be determined
+.PP
+Date fields:
+.IP a
+the locale's abbreviated weekday name (e.g.: Sun..Sat)
+.IP A
+the locale's full weekday name (e.g.: Sunday .. Saturday)
+.IP b
+the locale's abbreviated month name (e.g.: Jan .. Dec)
+.IP B
+the locale's full month name, (e.g.: January .. December)
+.IP c
+the locale's date and time (e.g.: "Sun Dec 15 14:12:47 GMT 1996")
+.IP d
+day of month (01 .. 31)
+.IP j
+day of year (001 .. 366)
+.IP m
+month (01 .. 12)
+.IP U
+week of the year with Sunday as first day of week (00..53, where week
+1 is the week containing the first Sunday of the year)
+.IP W
+week of the year with Monday as first day of week (00..53, where week
+1 is the week containing the first Monday of the year)
+.IP w
+day of week (0 .. 6, where 0 corresponds to Sunday)
+.IP x
+locale's date representation (e.g. today in Britain: "12/04/96")
+.IP y
+year without the century (00 .. 99)
+.IP Y
+year with the century (1970 .. 2038)
+.P
+Other specifiers may be available depending on the C library's
+implementation of the
+.B strftime
+function.
+.P
+.SH SEE ALSO
+.BR apache (1m)
+.BR cronolog (1m)
+.BR date (1)
+.BR strftime (3)
+.BR environ (5)
+.PP
+More information and the latest version of 
+.B cronolog 
+and
+.B cronosplit
+can be obtained from
+.LP
+        http://www.ford-mason.co.uk/resources/cronolog/
+.LP
+If you have any suggestions, bug reports, fixes, or enhancements,
+please mail them to the author.
+.SS More about Apache
+Documentation for the Apache http server is available from
+.LP
+        http://www.apache.org
+.SH AUTHOR
+Andrew Ford <A.Ford@ford-mason.co.uk> (http://www.ford-mason.co.uk/aford).
+.LP
+.B cronosplit
+is based on a script called
+.B splitlog
+by Roy Fielding, which is part of the 
+.B wwwstat
+package.
+

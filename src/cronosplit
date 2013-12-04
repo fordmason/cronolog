@@ -1,0 +1,264 @@
+#!/usr/bin/perl -- 		# -*- perl -*-
+#
+# cronosplit -- split log files into cronolog-compatible logs
+# $Id: cronosplit.in,v 1.4 1998/03/08 11:30:20 andrew Exp $
+#
+# Copyright (C) 1997  Ford & Mason Ltd
+# Written by Andrew Ford
+#	mailto:A.Ford@ford-mason.co.uk
+# 	http://www.ford-mason.co.uk/aford/
+#
+# The file LICENSE specifies the terms and conditions for redistribution.
+#
+# The latest version of cronolog can be found at:
+#
+#	http://www.ford-mason.co.uk/resources/cronolog/
+#
+# cronosplit is loosly based on the splitlog script by 
+# Roy Fielding <fielding@ics.uci.edu>
+# (splitlog is part of the wwwstat package,
+#  see <http://www.ics.uci.edu/pub/websoft/wwwstat/>)
+
+
+use Getopt::Long;
+
+$program    = 'cronosplit';
+$version    = '1.5b9';
+
+# Parameters
+
+$MaxHandles = 50;
+$DirMode    = 0775;
+
+
+# Patterns for log file entries (Common Log Format) and timestamps
+
+$log_entry_pattern = "^(\\S+) (\\S+) ([^[]+) \\[([^]]*)] \"([^\"]*)\" (\\S+) (\\S+)(.*)";
+$timestamp_pattern = "^([ 0-3]?\\d)/([A-Za-z]+)/(\\d{4}):(\\d\\d):(\\d\\d):(\\d\\d) [+ -]\\d{1,4}";
+
+# An associative array of month names and abbreviations
+
+%month = (Jan => 1,  January   => 1,
+	  Feb => 2,  February  => 2,
+	  Mar => 3,  March     => 3,
+	  Apr => 4,  April     => 4,
+	  May => 5,
+	  Jun => 6,  June      => 6,
+	  Jul => 7,  July      => 7,
+	  Aug => 8,  August    => 8,
+	  Sep => 9,  September => 9,  Sept => 9,
+	  Oct => 10, October   => 10,
+	  Nov => 11, November  => 11,
+	  Dec => 12, December  => 12);
+
+@month = ("", "January", "February", "March", "April", "May", "June",
+	  "July", "August", "September", "October", "November", "December");
+@mmm   = ("", "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+	  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec");
+
+@days  = ("Sunday", "Monday", "Tuesday", "Wednesday",
+	  "Thursday", "Friday", "Saturday");
+@ddd   = ("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat");
+
+
+# Process options
+
+(GetOptions("template=s",	\$template,
+	    "print-invalid",	\$PrintInvalids,
+	    "debug",            \$debug,
+	    "verbose",          \$verbose,
+	    "help",             \$print_help,
+	    "version",          \$print_version)
+ and ($print_help or $print_version or $template))
+    or $print_help++;
+
+$verbose++ if $debug;		# --debug implies --verbose
+
+
+# If version number requested, print it and exit
+
+if ($print_version)
+{
+    print <<EOF;
+$program version $version
+
+Copyright (C) 1997-1998 Ford & Mason Ltd
+This is free software; see the source for copying conditions.
+There is NO warranty; not even for MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.
+
+Written by Andrew Ford <A.Ford\@ford-mason.co.uk>
+
+$program is part of the cronolog package.
+The latest version of which can be found at:
+
+    http://www.ford-mason.co.uk/resources/cronolog/
+EOF
+    exit(0);
+}
+
+
+# If help requested, print it and exit
+
+if ($print_help)
+{
+    print <<EOS;
+Usage: $program --template=TEMPLATE [OPTIONS] file ...
+
+  --template=TEMPLATE   output log-file template
+  --print-invalid       print invalid log-file entries
+  --help                print this help, then exit
+  --version             print version number, then exit
+EOS
+    exit(0);
+}
+
+
+# Process each input file specified
+
+ FILE:
+foreach $file (@ARGV)
+{
+    print STDERR "opening \"$file\"\n" if $verbose;
+
+    if (! open(INFILE, $file))
+    {
+	print STDERR "cannot open \"$file\"\n";
+	next FILE;
+    }
+
+
+    # For each line in the current input log file parse the line,
+    # determine the appropritate output log and write the line.
+
+  LINE:
+    while (<INFILE>)
+    {
+	my($host, $ident, $authuser, $timestamp,
+	   $request, $status, $bytes, $trailer) = /$log_entry_pattern/;
+	
+	if (!($host && $ident && $authuser && $timestamp && $request && $status))
+        {
+            if ($PrintInvalids) { print STDERR "$.:$saveline"; }
+            next LINE;
+        }
+
+        if ($timestamp =~ /$timestamp_pattern/) 
+	{
+            ($day, $mon, $year, $hour, $min, $sec) = ($1, $2, $3, $4, $5, $6);
+        }
+        else
+        {
+            if ($PrintInvalids) { print STDERR "$.:$saveline"; }
+            next LINE;
+        }
+
+        next LINE unless defined($outfile = &get_handle($template,
+							$day, $mon, $year,
+							$hour, $min, $sec));
+
+        print($outfile $host, ' ', $ident, ' ', $authuser,
+	      ' [', $timestamp, '] "', $request, '" ',
+	      $status, ' ', $bytes, $trailer, "\n");
+
+    }
+    close(INFILE);
+}
+
+
+# Get a file handle for a log file, closing the oldest handle if there
+# are too many handles open
+
+sub get_handle
+{
+    my($template, $day, $mon, $year, $hour, $min, $sec) = @_;
+    $mon = $month{$mon};
+
+
+    # Determine the filename from the template and time
+
+    my($file) = $template;
+    $file =~ s/%Y/sprintf("%04d", $year)/eg;
+    $file =~ s/%m/sprintf("%02d", $mon)/eg;
+    $file =~ s/%d/sprintf("%02d", $day)/eg;
+    $file =~ s/%b/$mmm[$mon]/g;
+    $file =~ s/%B/$month[$mon]/g;
+    $file =~ s/%H/sprintf("%02d", $hour)/eg;
+    $file =~ s/%M/sprintf("%02m", $min)/eg;
+    $file =~ s/%S/sprintf("%02m", $sec)/eg;
+    
+
+    # See if we already have it open and ready to write
+    
+    return $handle if defined($handle = $OpenHandles{$file});
+
+    # See if we already have too many files opened
+
+    if (($#HandlesInUse + 1) >= $MaxHandles)
+    {
+        local($oldkey) = shift @HandlesInUse;   # close the oldest
+        $handle = $OpenHandles{$oldkey};
+        delete $OpenHandles{$oldkey};
+        close $handle;
+    }
+
+    # Finally, try to open and remember a new handle for this pathkey
+
+    $handle = ++$NextHandle;
+
+    make_dirs($file);
+
+    if (open($handle, ">>$file"))
+    {
+        push(@HandlesInUse, $file);
+        $OpenHandles{$file} = $handle;
+        return $handle;
+    }
+    else
+    {
+        warn "Failed open of $file: $!\n";
+        return undef;
+    }
+}
+
+
+# Make any missing directories on the path specified
+# (this subroutine is not optimal).
+
+sub make_dirs
+{
+    my($path) = shift;
+    my($abs);
+    
+    # Strip off the filename bit
+
+    $path =~ s!/[^/]*$!!;
+
+
+    # Return early if the directory exists
+
+    return if -d $path;
+
+
+    # Trim off any leading '/' (remembering whether the path was
+    # absolute or relative)
+
+    $path =~ s!^(/)!!;
+    $abs  = $1;
+
+
+    # Split what's left into directories
+
+    my(@path) = split(/\//, $path);
+
+
+    # Check each directory on the path
+
+    foreach $i  (0 .. $#path)
+    {
+	$path = $abs . join("/", (@path[0 .. $i]));
+	print(STDERR "Testing $path\n") if $debug;
+	print(STDERR "Making  $path\n") if !-d $path and $debug;
+	mkdir($path, $DirMode) unless -d $path;
+    }
+}

@@ -1,0 +1,11 @@
+Test suite for cronolog
+=======================
+
+The test suite checks 
+
+* the functionality of the cronolog utility functions
+* that log files are created in the correct directories
+* that changes to daylight saving time are acted on correctly
+* that the year 2000 poses no problems
+
+Unfortunately the testsuite is not yet written ;-)

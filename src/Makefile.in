@@ -1,0 +1,302 @@
+# Makefile.in generated automatically by automake 1.2 from Makefile.am
+
+# Copyright (C) 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
+# This Makefile.in is free software; the Free Software Foundation
+# gives unlimited permission to copy, distribute and modify it.
+
+
+SHELL = /bin/sh
+
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+VPATH = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+bindir = @bindir@
+sbindir = @sbindir@
+libexecdir = @libexecdir@
+datadir = @datadir@
+sysconfdir = @sysconfdir@
+sharedstatedir = @sharedstatedir@
+localstatedir = @localstatedir@
+libdir = @libdir@
+infodir = @infodir@
+mandir = @mandir@
+includedir = @includedir@
+oldincludedir = /usr/include
+
+pkgdatadir = $(datadir)/@PACKAGE@
+pkglibdir = $(libdir)/@PACKAGE@
+pkgincludedir = $(includedir)/@PACKAGE@
+
+top_builddir = ..
+
+ACLOCAL = @ACLOCAL@
+AUTOCONF = @AUTOCONF@
+AUTOMAKE = @AUTOMAKE@
+AUTOHEADER = @AUTOHEADER@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+transform = @program_transform_name@
+
+NORMAL_INSTALL = true
+PRE_INSTALL = true
+POST_INSTALL = true
+NORMAL_UNINSTALL = true
+PRE_UNINSTALL = true
+POST_UNINSTALL = true
+CC = @CC@
+LN_S = @LN_S@
+MAKEINFO = @MAKEINFO@
+PACKAGE = @PACKAGE@
+PERL = @PERL@
+RANLIB = @RANLIB@
+VERSION = @VERSION@
+
+sbin_PROGRAMS     = cronolog
+sbin_SCRIPTS      = cronosplit
+noinst_PROGRAMS   = cronotest
+
+cronolog_SOURCES  = cronolog.c  cronoutils.c cronoutils.h config.h
+cronotest_SOURCES = cronotest.c cronoutils.c cronoutils.h config.h
+
+INCLUDES          = -I../lib
+LDADD             = ../lib/libutil.a
+
+EXTRA_DIST        = $(sbin_SCRIPTS) 
+mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
+CONFIG_CLEAN_FILES =  cronosplit
+PROGRAMS =  $(noinst_PROGRAMS) $(sbin_PROGRAMS)
+
+
+DEFS = @DEFS@ -I. -I$(srcdir) 
+CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
+LIBS = @LIBS@
+cronotest_OBJECTS =  cronotest.o cronoutils.o
+cronotest_LDADD = $(LDADD)
+cronotest_DEPENDENCIES =  ../lib/libutil.a
+cronotest_LDFLAGS = 
+cronolog_OBJECTS =  cronolog.o cronoutils.o
+cronolog_LDADD = $(LDADD)
+cronolog_DEPENDENCIES =  ../lib/libutil.a
+cronolog_LDFLAGS = 
+SCRIPTS =  $(sbin_SCRIPTS)
+
+CFLAGS = @CFLAGS@
+COMPILE = $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
+LINK = $(CC) $(CFLAGS) $(LDFLAGS) -o $@
+DIST_COMMON =  Makefile.am Makefile.in cronosplit.in
+
+
+DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
+
+TAR = tar
+GZIP = --best
+SOURCES = $(cronotest_SOURCES) $(cronolog_SOURCES)
+OBJECTS = $(cronotest_OBJECTS) $(cronolog_OBJECTS)
+
+default: all
+
+.SUFFIXES:
+.SUFFIXES: .c .o
+$(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
+	cd $(top_srcdir) && $(AUTOMAKE) --gnu --include-deps src/Makefile
+
+Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
+	cd $(top_builddir) \
+	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
+
+cronosplit: $(top_builddir)/config.status cronosplit.in
+	cd $(top_builddir) && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= ./config.status
+
+mostlyclean-noinstPROGRAMS:
+
+clean-noinstPROGRAMS:
+	test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+
+distclean-noinstPROGRAMS:
+
+maintainer-clean-noinstPROGRAMS:
+
+mostlyclean-sbinPROGRAMS:
+
+clean-sbinPROGRAMS:
+	test -z "$(sbin_PROGRAMS)" || rm -f $(sbin_PROGRAMS)
+
+distclean-sbinPROGRAMS:
+
+maintainer-clean-sbinPROGRAMS:
+
+install-sbinPROGRAMS: $(sbin_PROGRAMS)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(sbindir)
+	@list='$(sbin_PROGRAMS)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    echo "  $(INSTALL_PROGRAM) $$p $(sbindir)/`echo $$p|sed '$(transform)'`"; \
+	     $(INSTALL_PROGRAM) $$p $(sbindir)/`echo $$p|sed '$(transform)'`; \
+	  else :; fi; \
+	done
+
+uninstall-sbinPROGRAMS:
+	$(NORMAL_UNINSTALL)
+	list='$(sbin_PROGRAMS)'; for p in $$list; do \
+	  rm -f $(sbindir)/`echo $$p|sed '$(transform)'`; \
+	done
+
+.c.o:
+	$(COMPILE) -c $<
+
+mostlyclean-compile:
+	rm -f *.o core
+
+clean-compile:
+
+distclean-compile:
+	rm -f *.tab.c
+
+maintainer-clean-compile:
+
+cronotest: $(cronotest_OBJECTS) $(cronotest_DEPENDENCIES)
+	@rm -f cronotest
+	$(LINK) $(cronotest_LDFLAGS) $(cronotest_OBJECTS) $(cronotest_LDADD) $(LIBS)
+
+cronolog: $(cronolog_OBJECTS) $(cronolog_DEPENDENCIES)
+	@rm -f cronolog
+	$(LINK) $(cronolog_LDFLAGS) $(cronolog_OBJECTS) $(cronolog_LDADD) $(LIBS)
+
+install-sbinSCRIPTS: $(sbin_SCRIPTS)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(sbindir)
+	@list='$(sbin_SCRIPTS)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    echo " $(INSTALL_SCRIPT) $$p $(sbindir)/`echo $$p|sed '$(transform)'`"; \
+	    $(INSTALL_SCRIPT) $$p $(sbindir)/`echo $$p|sed '$(transform)'`; \
+	  else if test -f $(srcdir)/$$p; then \
+	    echo " $(INSTALL_SCRIPT) $(srcdir)/$$p $(sbindir)/`echo $$p|sed '$(transform)'`"; \
+	    $(INSTALL_SCRIPT) $(srcdir)/$$p $(sbindir)/`echo $$p|sed '$(transform)'`; \
+	  else :; fi; fi; \
+	done
+
+uninstall-sbinSCRIPTS:
+	$(NORMAL_UNINSTALL)
+	list='$(sbin_SCRIPTS)'; for p in $$list; do \
+	  rm -f $(sbindir)/`echo $$p|sed '$(transform)'`; \
+	done
+
+tags: TAGS
+
+ID: $(HEADERS) $(SOURCES)
+	here=`pwd` && cd $(srcdir) && mkid -f$$here/ID $(SOURCES) $(HEADERS)
+
+TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES)
+	tags=; \
+	here=`pwd`; \
+	test -z "$(ETAGS_ARGS)$(SOURCES)$(HEADERS)$$tags" \
+	  || (cd $(srcdir) && etags $(ETAGS_ARGS) $$tags  $(SOURCES) $(HEADERS) -o $$here/TAGS)
+
+mostlyclean-tags:
+
+clean-tags:
+
+distclean-tags:
+	rm -f TAGS ID
+
+maintainer-clean-tags:
+
+distdir = $(top_builddir)/$(PACKAGE)-$(VERSION)/$(subdir)
+
+subdir = src
+
+distdir: $(DISTFILES)
+	@for file in $(DISTFILES); do \
+	  d=$(srcdir); \
+	  test -f $(distdir)/$$file \
+	  || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+	  || cp -p $$d/$$file $(distdir)/$$file; \
+	done
+cronolog.o cronolog.lo: cronolog.c cronoutils.h config.h ../lib/getopt.h
+cronotest.o cronotest.lo: cronotest.c cronoutils.h config.h \
+	../lib/getopt.h
+cronoutils.o cronoutils.lo: cronoutils.c cronoutils.h config.h
+
+info:
+dvi:
+check: all
+	$(MAKE)
+installcheck:
+install-exec: install-sbinPROGRAMS install-sbinSCRIPTS
+	@$(NORMAL_INSTALL)
+
+install-data: 
+	@$(NORMAL_INSTALL)
+
+install: install-exec install-data all
+	@:
+
+uninstall: uninstall-sbinPROGRAMS uninstall-sbinSCRIPTS
+
+all: Makefile $(PROGRAMS) $(SCRIPTS)
+
+install-strip:
+	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' INSTALL_SCRIPT='$(INSTALL_PROGRAM)' install
+installdirs:
+	$(mkinstalldirs)  $(sbindir) $(sbindir)
+
+
+mostlyclean-generic:
+	test -z "$(MOSTLYCLEANFILES)" || rm -f $(MOSTLYCLEANFILES)
+
+clean-generic:
+	test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
+
+distclean-generic:
+	rm -f Makefile $(DISTCLEANFILES)
+	rm -f config.cache config.log stamp-h stamp-h[0-9]*
+	test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
+
+maintainer-clean-generic:
+	test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
+	test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
+mostlyclean:  mostlyclean-noinstPROGRAMS mostlyclean-sbinPROGRAMS \
+		mostlyclean-compile mostlyclean-tags \
+		mostlyclean-generic
+
+clean:  clean-noinstPROGRAMS clean-sbinPROGRAMS clean-compile clean-tags \
+		clean-generic mostlyclean
+
+distclean:  distclean-noinstPROGRAMS distclean-sbinPROGRAMS \
+		distclean-compile distclean-tags distclean-generic \
+		clean
+	rm -f config.status
+
+maintainer-clean:  maintainer-clean-noinstPROGRAMS \
+		maintainer-clean-sbinPROGRAMS maintainer-clean-compile \
+		maintainer-clean-tags maintainer-clean-generic \
+		distclean
+	@echo "This command is intended for maintainers to use;"
+	@echo "it deletes files that may require special tools to rebuild."
+
+.PHONY: default mostlyclean-noinstPROGRAMS distclean-noinstPROGRAMS \
+clean-noinstPROGRAMS maintainer-clean-noinstPROGRAMS \
+mostlyclean-sbinPROGRAMS distclean-sbinPROGRAMS clean-sbinPROGRAMS \
+maintainer-clean-sbinPROGRAMS uninstall-sbinPROGRAMS \
+install-sbinPROGRAMS mostlyclean-compile distclean-compile \
+clean-compile maintainer-clean-compile uninstall-sbinSCRIPTS \
+install-sbinSCRIPTS tags mostlyclean-tags distclean-tags clean-tags \
+maintainer-clean-tags distdir info dvi installcheck install-exec \
+install-data install uninstall all installdirs mostlyclean-generic \
+distclean-generic clean-generic maintainer-clean-generic clean \
+mostlyclean distclean maintainer-clean
+
+#mod_cronolog.c
+
+$(PROGRAMS): $(LDADD)
+
+# Tell versions [3.59,3.63) of GNU make to not export all variables.
+# Otherwise a system limit (for SysV at least) may be exceeded.
+.NOEXPORT:

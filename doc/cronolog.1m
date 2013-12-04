@@ -1,12 +1,27 @@
-.TH cronolog 1 "December 1996"
-.\" $Id: cronolog.1,v 1.2 1996/12/15 15:34:44 andrew Exp $
-.\" Copyright (c) 1996 Andrew Ford.  All rights reserved.
+.\" -*- nroff -*-
+.\" $Id: cronolog.1m,v 1.4 1998/03/10 10:58:57 andrew Exp $
+.\" Copyright (c) 1996-1998 Andrew Ford and Ford & Mason Ltd.
 .\" The file LICENSE specifies the terms and conditions for redistribution.
+.TH cronolog 1m "March 1998"
+
 .SH NAME
 cronolog \- write log messages to log files named according to a template
+
 .SH SYNOPSIS
-.B cronolog
+cronolog
+[-H NAME] [--hardlink=NAME]
+[-S NAME] [--symlink=NAME]
+[-l NAME] [--link=NAME]
+[-h]      [--help]
+[-o]      [--once-only]
+[-x FILE] [-x -] [--debug=FILE] [--debug==-]
+[-s TIME] [--start-time=TIME]
+[-e] [--european]
+[-a] [--american]
+[-V] [--version]
+
 .I template
+
 .SH DESCRIPTION
 .B cronolog
 is a simple program that reads log messages from its input and writes
@@ -50,8 +65,77 @@ after midnight the files
         /www/logs/1997/01/01/errors.log
 .P
 would be used, with the directories 1997, 1997/01 and 1997/01/01 being
-created if they did not already exist.
-.SS Template format
+created if they did not already exist.  (Note that prior to version 1.2 Apache
+did not allow a program to be specified as the argument of the
+ErrorLog directive.)
+
+.SH Options
+.C cronolog
+accepts the following options and arguments:
+.\"
+.IP "-H \fINAME\fP"
+.IP "--hardlink=\fINAME\fP"
+maintain a hard link from
+.I NAME
+to the current log file.
+.\"
+.IP "-S \fINAME\fP"
+.IP "--symlink=\fINAME\fP"
+.IP "-l \fINAME\fP"
+.IP "--link=\fINAME\fP"
+maintain a symbolic link from 
+.I NAME
+to the current log file.
+.\"
+.IP -h
+.IP --help
+print a help message and then exit.
+.\"
+.IP "-o"
+.IP "--once-only"
+create single output log from template, which is not rotated.
+.\"
+.IP "-x FILE"
+.IP "--debug=\fIFILE\fP"
+write debug messages to 
+.I FILE
+or to the standard error stream if 
+.I FILE 
+is "-".  (See the README file for more details.)
+.\"
+.IP "-s TIME"
+.IP "--start-time=\fITIME\fP"
+pretend that the starting time is
+.I TIME
+(for debugging purposes).
+.I TIME should be something like "DD MONTH YYYY HH:MM:SS" (the day and
+month are reversed if the american option is specified).  If the
+seconds are omitted then they are taken as zero and if the hours and
+minutes are omitted then the time of day is taken as 00:00:00
+(i.e. midnight).  The day, month and year can be separated by spaces,
+hyphens (-) or solidi (/).
+.\"
+.IP -a
+.IP --american
+Interprete the date part of the starting time the American way (month
+then day).
+.IP -e
+.IP --european
+Interprete the date part of the starting time the European way (day
+then month).  This is the default.
+.\"
+.IP -v
+.IP --version
+print version information and exit.
+.\"
+.\"
+.\" .IP "-p \fIprogram\fP"
+.\" postprocess each logfile using program once a new logfile is created.
+.\" \fIprogram\fP is invoked with the name of the previous logfile as its
+.\" argument.
+.\"
+.\"
+.SH Template format
 Each character in the template represents a character in the expanded
 filename, except for date and time format specifiers, which are
 replaced by their expansion.  Format specifiers consist of a `%'
@@ -105,7 +189,7 @@ week of the year with Monday as first day of week (00..53, where week
 .IP w
 day of week (0 .. 6, where 0 corresponds to Sunday)
 .IP x
-locale's date representation (e.g. today in Britain: "15/12/96")
+locale's date representation (e.g. today in April in Britain: "13/04/97")
 .IP y
 year without the century (00 .. 99)
 .IP Y
@@ -126,7 +210,7 @@ More information and the latest version of
 .B cronolog 
 can be obtained from
 .LP
-        http://www.nhbs.co.uk/aford/resources/apache/cronolog/
+        http://www.ford-mason.co.uk/resources/cronolog/
 .LP
 If you have any suggestions, bug reports, fixes, or enhancements,
 please mail them to the author.
@@ -134,6 +218,7 @@ please mail them to the author.
 Documentation for the Apache http server is available from
 .LP
         http://www.apache.org
+.\"
 .SH FUTURE DIRECTIONS
 The functionality of
 .B cronolog
@@ -144,9 +229,13 @@ the case where multiple log streams are written to the same file
 (template), for example where different virtual servers write to the
 same set of log files.
 .SH AUTHOR
-Andrew Ford <andrew@icarus.demon.co.uk> (http://www.nhbs.co.uk/aford).
+Andrew Ford <A.Ford@ford-mason.co.uk> (http://www.ford-mason.co.uk/aford).
 .LP
 .B cronolog
 is based on a program called
 .B rotatelogs
 by Ben Laurie, which is packaged with the Apache web server.
+.LP
+The symbolic link
+.\" and postprocessing options were
+option was suggested by Juergen Lesny.

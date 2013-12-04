@@ -1,4 +1,4 @@
-CRONOLOG
+CRONOLOG version 1.5b9
 
 "cronolog" is a simple program that reads log messages from its input
 and writes them to a set of output files, the names of which are
@@ -76,29 +76,49 @@ new file (creating missing directories on the path of the new log file
 as needed unless the program is compiled with -DDONT_CREATE_SUBDIRS)
 and calculates the time at which the new file will become invalid.
 
+The most up-to-date version of "cronolog" can be found at:
+
+	http://www.ford-mason.co.uk/resources/cronolog/
+
 
 INSTALLATION
+============
 
-Examine Makefile, set CC and CFLAGS and type "make".
+Cronolog uses GNU autoconf, so it is configured and built
+with the standard sequence:
 
-CFLAGS can usefully include any of the following:
+	./configure
+	make
+
+To install type "make install" or simply copy the executable
+"src/cronolog" to a suitable directory.
+
+Cronolog has a number of options that can be set either by including
+in CFLAGS when configuring, or by editing the file "src/config.h":
 
 	-DFILE_MODE=octal-number	mode used for creating files (default is 0664)
 	-DDIR_MODE=octal-number		mode used for creating directories (default is 0775)
 	-DDONT_CREATE_SUBDIRS		don't include code to create missing directories
 	-DNEED_GETOPT_DEFS		if your platform doesn't declare getopt()
-	-DDEBUG				enable debugging code
 
-If it includes -DTESTHARNESS, then a simple test harness program is
-compiled, which tests out the lower level functions and prints out
-debugging information.  The test program is run with the command line:
+e.g. to set the file mode to 0600:
 
-	testharness [-d] "template" count
+	CFLAGS="-O2 -DFILE_MODE=0600" ./configure
+
+
+TESTING
+=======
+
+The package includes a simple test harness program (cronotest), which
+tests out the lower level functions and prints out debugging
+information.  The test program is run with the command line:
+
+	cronotest [-d] "template" count
 
 template is the filename template and count is the number of periods
 to evaluate, for example:
 
-	$ testharness "%Y/%m/%d/access.log" 4
+	$ cronotest "%Y/%m/%d/access.log" 4
 	Determining periodicity of "%Y/%m/%d/access.log"
 	%Y -> yearly
 	%m -> monthly
@@ -113,7 +133,7 @@ to evaluate, for example:
 Specifying the flag -d instructs the test program to create missing
 subdirectories, for example, having created a directory 1996:
 
-	$ testharness -d  "%Y/%m/%d/access.log" 4
+	$ cronotest -d  "%Y/%m/%d/access.log" 4
 	Determining periodicity of "%Y/%m/%d/access.log"
 	%Y -> yearly
 	%m -> monthly
@@ -147,4 +167,78 @@ subdirectories, for example, having created a directory 1996:
 	Directory "1996/12/18" does not exist -- creating
 
 
-To install simply copy the executable "cronolog" to a suitable directory.
+Extra debugging code was added to cronolog at version 1.5b8 to
+facilitate interactive testing.  To activate this cronolog must be
+must be invoked with -x (use -x- to send debug messages to stderr).
+In this mode each time it reads a message cronolog will print a
+message giving the current time, the start of the next period and the
+number of seconds until the start of the next period.  This option is
+obviously not very useful when cronolog is being used for a production
+server handling several thousands or millions of requests a day, but
+can be useful for checking that cronolog is working correctly.  You
+could set up a virtual server that was only used for testing and
+periodically send it a request.  The -s option allows a start time to
+be specified -- cronolog will pretend that that is the current time.
+
+The following transcript shows how cronolog can be used for such a
+test.  Lines prefixed by "**" are the lines I typed.  The log file
+template creates a new log file every minute in a new directory.  I
+specified a start time a minute before the change from GMT to BST
+(British Summer Time).
+
+ ** [andrew@icarus src]$ cronolog -x- -s "29 March 1998 00:59" \
+        "tmp/%Y.%m.%d/%H:%M/%Y.%m.%d-%H:%M-access.log"
+    cronolog version 1.5b8
+
+    Copyright (C) 1997 Ford & Mason Ltd.
+    This is free software; see the source for copying conditions.
+    There is NO warranty; not even for MERCHANTABILITY or FITNESS
+    FOR A PARTICULAR PURPOSE.
+
+    Written by Andrew Ford <A.Ford@ford-mason.co.uk>
+
+    The latest version can be found at:
+
+	http://www.ford-mason.co.uk/resources/cronolog/
+
+    Using offset of 1606971 seconds from real time
+    Determining periodicity of "tmp/%Y.%m.%d/%H:%M/%Y.%m.%d-%H:%M-access.log"
+    %Y -> yearly
+    %m -> monthly
+    %d -> daily
+    %H -> hourly
+    %M -> per minute
+    periodicity = minute
+ ** MESSAGE ONE
+    1998/03/29-00:59:04 GMT (891133144): using log file \
+        "tmp/1998.03.29/00:59/1998.03.29-00:59-access.log" \
+        until 1998/03/29-02:00:00 BST (891133200) (for 56 secs)
+    Creating missing components of "tmp/1998.03.29/00:59/1998.03.29-00:59-access.log"
+    Testing directory "tmp"
+    Directory "tmp" does not exist -- creating
+    Testing directory "tmp/1998.03.29"
+    Directory "tmp/1998.03.29" does not exist -- creating
+    Testing directory "tmp/1998.03.29/00:59"
+    Directory "tmp/1998.03.29/00:59" does not exist -- creating
+    1998/03/29-00:59:04 GMT (891133144): wrote message; \
+        next period starts at 1998/03/29-02:00:00 BST (891133200) in 56 secs
+ ** MESSAGE TWO
+    1998/03/29-00:59:32 GMT (891133172): wrote message; \
+        next period starts at 1998/03/29-02:00:00 BST (891133200) in 28 secs
+ ** MESSAGE THREE
+    1998/03/29-02:00:00 BST (891133200): using log file \
+        "tmp/1998.03.29/02:00/1998.03.29-02:00-access.log" \
+        until 1998/03/29-02:01:00 BST (891133260) (for 60 secs)
+    Creating missing components of "tmp/1998.03.29/02:00/1998.03.29-02:00-access.log"
+    Initial prefix "tmp" known to exist
+    Initial prefix "tmp/1998.03.29" known to exist
+    Testing directory "tmp/1998.03.29/02:00"
+    Directory "tmp/1998.03.29/02:00" does not exist -- creating
+    1998/03/29-02:00:00 BST (891133200): wrote message; \
+        next period starts at 1998/03/29-02:01:00 BST (891133260) in 60 secs
+
+This output shows cronolog:
+ * checking the periodicity of the log file template
+ * creating missing directories for new log files
+ * skipping stat() tests on directories it "knows" already exist
+ * recalculating the time until a new log file needs to be opened

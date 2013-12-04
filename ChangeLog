@@ -1,3 +1,24 @@
+Thu Jun  4 15:48:01 1998  Andrew Ford  <andrew@icarus.demon.co.uk>
+
+	* Bumped beta version number to 1.5b9
+	* src/cronolog.c: removed spurious semicolon from if statement
+	* src/cronotest.c: ditto
+	* TODO: remove mention of symbolic link
+	
+Sun Mar  8 11:01:33 1998  Andrew Ford  <andrew@icarus.demon.co.uk>
+
+	* Updated README file and documentation (changed URLs to point to
+  	  www.ford-mason.uk as archive site) 
+	* src/config.h: new file (split out of src/cronoutils.h)
+	* src/cronolog.c: rearranged main loop so that a new log file is
+	  not created until a message has been read, to avoid creating
+	  empty log files
+	* src/cronolog.c: more debug messages
+
+Wed Apr  9 20:47:57 1997  Andrew Ford  <andrew@icarus.demon.co.uk>
+
+	*  AUTHORS NEWS: New files.
+
 Fri Dec 20 11:05:59 1996  Andrew Ford  <andrew@icarus.demon.co.uk>
 
 	* Version 1.4 released -- optimized create_subdirs to avoid

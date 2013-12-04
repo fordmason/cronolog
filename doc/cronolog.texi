@@ -1,0 +1,129 @@
+\input texinfo               @c             -*- Texinfo -*-
+@finalout
+@setfilename cronolog.info
+@c
+@c This file documents cronolog - program for rotating web server logs
+@c
+@c Copyright (C) 1997 Ford & Mason Ltd.
+@c
+@c This text may be freely distributed under the terms of the GNU
+@c General Public License.
+@c
+
+@ifinfo
+@format
+START-INFO-DIR-ENTRY
+* Cronolog: (cronolog).            A log file rotation program for web servers
+END-INFO-DIR-ENTRY
+@end format
+@end ifinfo
+
+@setchapternewpage odd
+@settitle Cronolog
+@titlepage
+@title Cronolog
+@subtitle A log file rotation program for web servers
+@sp 1
+@subtitle April 1997
+@author Andrew Ford
+@page
+
+@tex
+{\parskip=0pt \hfill Ford \& Mason Ltd}
+@end tex
+
+@vskip 0pt plus 1filll
+Copyright @copyright{} 1997 Ford @& Mason Ltd
+
+Permission is granted to make and distribute verbatim copies of
+this manual provided the copyright notice and this permission notice
+are preserved on all copies.
+
+@noindent
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided also that
+the entire resulting derived work is distributed under the terms of a
+permission notice identical to this one.
+
+Permission is granted to copy and distribute translations of this manual
+into another language, under the above conditions for modified versions.
+@end titlepage
+
+@ifinfo
+Copyright @copyright{} 1997 Ford & Mason Ltd.
+
+Permission is granted to make and distribute verbatim copies of
+this manual provided the copyright notice and this permission notice
+are preserved on all copies.
+
+@ignore
+Permission is granted to process this file through TeX and print the
+results, provided the printed document carries a copying permission
+notice identical to this one except for the removal of this paragraph
+(this paragraph not being relevant to the printed manual).
+@end ignore
+
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided also that
+the entire resulting derived work is distributed under the terms of a
+permission notice identical to this one.
+
+Permission is granted to copy and distribute translations of this manual
+into another language, under the above conditions for modified versions.
+
+@node Top, Overview, (dir), (dir)
+@top Cronolog
+
+Cronolog is a log file rotation program for web servers.
+
+This file describes version 1.3 of cronolog.
+
+@menu
+* Overview::                    What is Cronolog?
+* How Cronolog works::          How Cronolog works
+* Support utilities::           Suport utilities
+* Index::                       Index
+@end menu
+@end ifinfo
+
+@iftex
+@raggedbottom
+@end iftex
+
+@node Overview, How Cronolog works, Top, Top
+@chapter What is Cronolog?
+@cindex overview
+
+Cronolog is a log file rotation program for web servers.
+
+@node How Cronolog works, Support utilities, Overview, Top
+@chapter How Cronolog works
+
+When Cronolog starts up it examines the log file template specified on
+the command line and determines the periodicity of the log files,
+i.e. how often the log file should be rotated.  It does this by looking
+for date format directives within the template and recording which
+directive specifies the smallest unit of time.
+
+When a log file is opened, Cronolog calculates the earliest time at
+which a new log file should be written.
+
+
+@node Support utilities, Index, How Cronolog works, Top
+@chapter Support utilities
+
+If you have not been rotating your log files or you have used another
+mechanism for rotating log files, you may want to split your existing
+log files according to the template you are using for Cronolog.  A
+simple perl script called @code{split-logs-by-timestamp} is provided to
+do just that.
+
+
+@node Index,  , Support utilities, Top
+@unnumbered Index
+
+@printindex cp
+
+@contents
+
+@bye
