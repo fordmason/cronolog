@@ -247,11 +247,11 @@ create_link(char *pfilename,
 {
     struct stat		stat_buf;
     
-    if (stat(prevlinkname, &stat_buf) == 0)
+    if (prevlinkname && stat(prevlinkname, &stat_buf) == 0)
     {
 	unlink(prevlinkname);
     }
-    if (stat(linkname, &stat_buf) == 0)
+    if (linkname && stat(linkname, &stat_buf) == 0)
     {
 	if (prevlinkname) {
 	    rename(linkname, prevlinkname);
