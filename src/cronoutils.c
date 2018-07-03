@@ -169,6 +169,26 @@ new_log_file(const char *template, const char *linkname, mode_t linktype, const 
     return log_fd;
 }
 
+int
+ready_to_read(int fd, int seconds_remaining)
+{
+    fd_set set;
+    FD_ZERO(&set); /* clear the set */
+    FD_SET(fd, &set); /* add our file descriptor to the set */
+
+    struct timeval timeout;
+    timeout.tv_sec = seconds_remaining;
+    timeout.tv_usec = 0;
+
+    int rv = select(fd + 1, &set, NULL, NULL, &timeout);
+    if (rv < 0)
+    {
+	perror("select"); /* an error accured */
+	exit(6);
+    }
+    return rv;
+}
+
 /* Try to create missing directories on the path of filename.
  *
  * Note that on a busy server there may theoretically be many cronolog

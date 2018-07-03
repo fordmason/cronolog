@@ -299,47 +299,49 @@ main(int argc, char **argv)
 
     DEBUG(("Rotation period is per %d %s\n", period_multiple, periods[periodicity]));
 
+    time_now = time(NULL) + time_offset;
+    log_fd = new_log_file(template, linkname, linktype, prevlinkname,
+			  periodicity, period_multiple, period_delay,
+			  filename, sizeof (filename), time_now, &next_period);
 
     /* Loop, waiting for data on standard input */
 
     for (;;)
     {
-	/* Read a buffer's worth of log file data, exiting on errors
-	 * or end of file.
-	 */
-	n_bytes_read = read(0, read_buf, sizeof read_buf);
-	if (n_bytes_read == 0)
-	{
-	    exit(3);
-	}
-	if (errno == EINTR)
-	{
-	    continue;
-	}
-	else if (n_bytes_read < 0)
-	{
-	    exit(4);
-	}
+	if (ready_to_read(0, next_period - time_now)) {
+	    /* Read a buffer's worth of log file data, exiting on errors
+	     * or end of file.
+	     */
+	    n_bytes_read = read(0, read_buf, sizeof read_buf);
+	    if (n_bytes_read == 0)
+	    {
+		exit(3);
+	    }
+	    if (n_bytes_read < 0)
+	    {
+		if (errno == EINTR)
+		{
+		    continue;
+		}
+		exit(4);
+	    }
+	} else
+	    n_bytes_read = 0;
 
 	time_now = time(NULL) + time_offset;
 	
-	/* If the current period has finished and there is a log file
-	 * open, close the log file
+	/* If the current period has finished, close the log file and open a new one.
 	 */
-	if ((time_now >= next_period) && (log_fd >= 0))
+	if (time_now >= next_period)
 	{
 	    close(log_fd);
-	    log_fd = -1;
-	}
-	
-	/* If there is no log file open then open a new one.
-	 */
-	if (log_fd < 0)
-	{
 	    log_fd = new_log_file(template, linkname, linktype, prevlinkname,
 				  periodicity, period_multiple, period_delay,
 				  filename, sizeof (filename), time_now, &next_period);
 	}
+
+	if (n_bytes_read == 0)
+	    continue;
 
 	DEBUG(("%s (%d): wrote message; next period starts at %s (%d) in %d secs\n",
 	       timestamp(time_now), time_now, 
