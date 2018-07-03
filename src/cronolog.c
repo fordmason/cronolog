@@ -86,12 +86,6 @@
 #include "getopt.h"
 
 
-/* Forward function declaration */
-
-int	new_log_file(const char *, const char *, mode_t, const char *,
-		     PERIODICITY, int, int, char *, size_t, time_t, time_t *);
-
-
 /* Definition of version and usage messages */
 
 #ifndef _WIN32
