@@ -265,6 +265,12 @@ create_link(char *pfilename,
 #ifndef _WIN32
     if (linktype == S_IFLNK)
     {
+	/* Try to use a relative symlink:  if the path portion of the symlink
+	 * is a prefix of the filename, remove that path from the symlink. */
+	char *slash = strrchr(linkname, '/');
+	int len = slash ? slash - linkname + 1 : -1;
+	if (len > 0 && strncmp(pfilename, linkname, len) == 0)
+	    pfilename += len;
 	symlink(pfilename, linkname);
     }
     else
