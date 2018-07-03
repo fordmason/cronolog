@@ -1,4 +1,4 @@
-CRONOLOG version 1.6.1
+CRONOLOG version 1.6.3
 
 "cronolog" is a simple program that reads log messages from its input
 and writes them to a set of output files, the names of which are
