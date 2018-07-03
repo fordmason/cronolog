@@ -12,7 +12,7 @@
  *
  * The latest version of cronolog can be found at:
  *
- *	http://www.ford-mason.co.uk/resources/cronolog/
+ *	https://github.com/fordmason/cronolog
  *
  */
 
