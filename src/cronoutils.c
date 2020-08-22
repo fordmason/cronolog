@@ -69,6 +69,8 @@
  *
  */
 
+#define _GNU_SOURCE	1
+
 #include "cronoutils.h"
 /*extern char *tzname[2];*/
 
@@ -144,13 +146,13 @@ new_log_file(const char *template, const char *linkname, mode_t linktype, const 
 	   timestamp(*pnext_period), *pnext_period,
 	   *pnext_period - time_now));
     
-    log_fd = open(pfilename, O_WRONLY|O_CREAT|O_APPEND, FILE_MODE);
+    log_fd = open(pfilename, O_WRONLY|O_CREAT|O_APPEND|O_LARGEFILE, FILE_MODE);
     
 #ifndef DONT_CREATE_SUBDIRS
     if ((log_fd < 0) && (errno == ENOENT))
     {
 	create_subdirs(pfilename);
-	log_fd = open(pfilename, O_WRONLY|O_CREAT|O_APPEND, FILE_MODE);
+	log_fd = open(pfilename, O_WRONLY|O_CREAT|O_APPEND|O_LARGEFILE, FILE_MODE);
     }
 #endif	    
 
