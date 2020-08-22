@@ -85,6 +85,9 @@
 #include <limits.h>
 #ifndef _WIN32
 #include <unistd.h>
+#ifndef __USE_XOPEN
+#define __USE_XOPEN
+#endif
 #else
 #include <io.h>
 #include <direct.h>
