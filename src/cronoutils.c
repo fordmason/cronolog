@@ -69,6 +69,8 @@
  *
  */
 
+#define _GNU_SOURCE	1
+
 #include "cronoutils.h"
 /*extern char *tzname[2];*/
 
@@ -144,13 +146,13 @@ new_log_file(const char *template, const char *linkname, mode_t linktype, const 
 	   timestamp(*pnext_period), *pnext_period,
 	   *pnext_period - time_now));
     
-    log_fd = open(pfilename, O_WRONLY|O_CREAT|O_APPEND, FILE_MODE);
+    log_fd = open(pfilename, O_WRONLY|O_CREAT|O_APPEND|O_LARGEFILE, FILE_MODE);
     
 #ifndef DONT_CREATE_SUBDIRS
     if ((log_fd < 0) && (errno == ENOENT))
     {
 	create_subdirs(pfilename);
-	log_fd = open(pfilename, O_WRONLY|O_CREAT|O_APPEND, FILE_MODE);
+	log_fd = open(pfilename, O_WRONLY|O_CREAT|O_APPEND|O_LARGEFILE, FILE_MODE);
     }
 #endif	    
 
@@ -165,6 +167,26 @@ new_log_file(const char *template, const char *linkname, mode_t linktype, const 
 	create_link(pfilename, linkname, linktype, prevlinkname);
     }
     return log_fd;
+}
+
+int
+ready_to_read(int fd, int seconds_remaining)
+{
+    fd_set set;
+    FD_ZERO(&set); /* clear the set */
+    FD_SET(fd, &set); /* add our file descriptor to the set */
+
+    struct timeval timeout;
+    timeout.tv_sec = seconds_remaining;
+    timeout.tv_usec = 0;
+
+    int rv = select(fd + 1, &set, NULL, NULL, &timeout);
+    if (rv < 0)
+    {
+	perror("select"); /* an error accured */
+	exit(6);
+    }
+    return rv;
 }
 
 /* Try to create missing directories on the path of filename.
@@ -247,11 +269,11 @@ create_link(char *pfilename,
 {
     struct stat		stat_buf;
     
-    if (stat(prevlinkname, &stat_buf) == 0)
+    if (prevlinkname && lstat(prevlinkname, &stat_buf) == 0)
     {
 	unlink(prevlinkname);
     }
-    if (stat(linkname, &stat_buf) == 0)
+    if (lstat(linkname, &stat_buf) == 0)
     {
 	if (prevlinkname) {
 	    rename(linkname, prevlinkname);
@@ -263,6 +285,12 @@ create_link(char *pfilename,
 #ifndef _WIN32
     if (linktype == S_IFLNK)
     {
+	/* Try to use a relative symlink:  if the path portion of the symlink
+	 * is a prefix of the filename, remove that path from the symlink. */
+	char *slash = strrchr(linkname, '/');
+	int len = slash ? slash - linkname + 1 : -1;
+	if (len > 0 && strncmp(pfilename, linkname, len) == 0)
+	    pfilename += len;
 	symlink(pfilename, linkname);
     }
     else

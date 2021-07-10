@@ -10,7 +10,7 @@ Release:	%{release}
 Copyright: 	Apache license
 Group:		%{group}
 Packager:	Andrew Ford <A.Ford@ford-mason.co.uk>
-URL: 		http://www.ford-mason.co.uk/resources/cronolog/
+URL: 		https://github.com/fordmason/cronolog
 
 Source:		http://www.ford-mason.co.uk/resources/cronolog/cronolog-%version.tar.gz
 

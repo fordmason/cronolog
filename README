@@ -1,4 +1,4 @@
-CRONOLOG version 1.6.1
+CRONOLOG version 1.6.3
 
 "cronolog" is a simple program that reads log messages from its input
 and writes them to a set of output files, the names of which are
@@ -78,7 +78,7 @@ and calculates the time at which the new file will become invalid.
 
 The most up-to-date version of "cronolog" can be found at:
 
-	http://www.ford-mason.co.uk/resources/cronolog/
+	https://github.com/fordmason/cronolog
 
 
 INSTALLATION
@@ -199,7 +199,7 @@ specified a start time a minute before the change from GMT to BST
 
     The latest version can be found at:
 
-	http://www.ford-mason.co.uk/resources/cronolog/
+	https://github.com/fordmason/cronolog
 
     Using offset of 1606971 seconds from real time
     Determining periodicity of "tmp/%Y.%m.%d/%H:%M/%Y.%m.%d-%H:%M-access.log"

@@ -143,7 +143,7 @@ Written by Andrew Ford <A.Ford\@ford-mason.co.uk>
 $program is part of the cronolog package.
 The latest version of which can be found at:
 
-    http://www.ford-mason.co.uk/resources/cronolog/
+    https://github.com/fordmason/cronolog
 EOF
     exit(0);
 }
