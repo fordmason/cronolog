@@ -168,7 +168,7 @@ int		new_log_file(const char *template, const char *linkname,
 			     PERIODICITY periodicity, int period_multiple, int period_delay,
 			     char *pfilename, size_t pfilename_len,
 			     time_t time_now, time_t *pnext_period);
-int		ready_to_read(int fd, int seconds_remaining);
+int		ready_to_read(int fd, time_t seconds_remaining);
 void		create_subdirs(char *);
 void		create_link(char *, const char *, mode_t, const char *);
 PERIODICITY	determine_periodicity(char *);

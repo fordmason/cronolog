@@ -170,7 +170,7 @@ new_log_file(const char *template, const char *linkname, mode_t linktype, const 
 }
 
 int
-ready_to_read(int fd, int seconds_remaining)
+ready_to_read(int fd, time_t seconds_remaining)
 {
     fd_set set;
     FD_ZERO(&set); /* clear the set */
