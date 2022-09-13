@@ -1,0 +1,10 @@
+*.o
+*.a
+Makefile
+/config.h
+/config.log
+/config.status
+.deps/
+/src/cronolog
+/src/cronotest
+/stamp-h1
