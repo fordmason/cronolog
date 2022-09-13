@@ -137,7 +137,7 @@ new_log_file(const char *template, const char *linkname, mode_t linktype, const 
 
     start_of_period = start_of_this_period(time_now, periodicity, period_multiple);
     tm = localtime(&start_of_period);
-    strftime(pfilename, BUFSIZE, template, tm);
+    strftime(pfilename, pfilename_len, template, tm);
     *pnext_period = start_of_next_period(start_of_period, periodicity, period_multiple) + period_delay;
     
     DEBUG(("%s (%d): using log file \"%s\" from %s (%d) until %s (%d) (for %d secs)\n",
