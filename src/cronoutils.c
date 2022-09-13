@@ -291,11 +291,13 @@ create_link(char *pfilename,
 	int len = slash ? slash - linkname + 1 : -1;
 	if (len > 0 && strncmp(pfilename, linkname, len) == 0)
 	    pfilename += len;
-	symlink(pfilename, linkname);
+	if (symlink(pfilename, linkname) < 0)
+	    perror("Error creating logfile symlink");
     }
     else
     {
-	link(pfilename, linkname);
+	if (link(pfilename, linkname) < 0)
+	    perror("Error creating logfile link");
     }
 #else
     fprintf(stderr, "Creating link from %s to %s not supported", pfilename, linkname);
