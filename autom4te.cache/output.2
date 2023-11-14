@@ -4737,6 +4737,9 @@ fi
 
 
 
+# Autoupdate added the next two lines to ensure that your configure
+# script's behavior did not change.  They are probably safe to remove.
+
 ac_header= ac_cache=
 for ac_item in $ac_header_c_list
 do
@@ -4834,9 +4837,6 @@ fi
 printf "%s\n" "$ac_cv_path_GREP" >&6; }
  GREP="$ac_cv_path_GREP"
  
-
-# Autoupdate added the next two lines to ensure that your configure
-# script's behavior did not change.  They are probably safe to remove.
 
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for egrep" >&5
 printf %s "checking for egrep... " >&6; }
@@ -4956,9 +4956,7 @@ printf "%s\n" "@%:@define STAT_MACROS_BROKEN 1" >>confdefs.h
 
 fi
 
-
-  
-# Obsolete code to be removed.
+(sys/time.h)
 if test $ac_cv_header_sys_time_h = yes; then
   
 printf "%s\n" "@%:@define TIME_WITH_SYS_TIME 1" >>confdefs.h
@@ -5524,6 +5522,7 @@ esac
 printf "%s\n" "@%:@define malloc rpl_malloc" >>confdefs.h
 
 fi
+
 
 
 ac_func=
