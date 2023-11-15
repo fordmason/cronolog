@@ -65,7 +65,6 @@
  * as the original contributor of this module.  All other licensing
  * and usage conditions are those of the Apache Software Foundation.
  *
-printf "%s\n" "#define TIME_WITH_SYS_TIME 1" >>confdefs.h
  * Originally written by Andrew Ford <A.Ford@ford-mason.co.uk>
  *
  * For platforms that don't declare getopt() in header files the symbol
@@ -95,10 +94,17 @@ printf "%s\n" "#define TIME_WITH_SYS_TIME 1" >>confdefs.h
 #include <sys/stat.h>
 
 
-#if HAVE_SYS_TIME_H
-#include <sys/time.h>
-#include <time.h>
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
 #endif
+
 
 #ifdef _WIN32
 #define mode_t int
@@ -151,7 +157,6 @@ extern int optind, opterr, optopt;
 typedef enum 
 {
     PER_SECOND, PER_MINUTE, HOURLY, DAILY, WEEKLY, MONTHLY, YEARLY, ONCE_ONLY, UNKNOWN, INVALID_PERIOD
-printf "%s\n" "#define TIME_WITH_SYS_TIME 1" >>confdefs.h
 }
 PERIODICITY;
 

@@ -7,7 +7,7 @@ noinst_PROGRAMS   = cronotest
 cronolog_SOURCES  = cronolog.c  cronoutils.c cronoutils.h cronoconf.h
 cronotest_SOURCES = cronotest.c cronoutils.c cronoutils.h cronoconf.h
 
-AM_CPPFLAGS          = -I../lib
+INCLUDES          = -I../lib
 LDADD             = ../lib/libutil.a
 
 EXTRA_DIST        = $(sbin_SCRIPTS) 
