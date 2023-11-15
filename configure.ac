@@ -27,7 +27,7 @@ AC_REVISION($Id: configure.ac 1671 2003-07-05 07:19:51Z andrew $)
 
 AC_INIT([cronolog],[1.6.3],[A.Ford@ford-mason.co.uk])
 AC_SUBST([PACKAGE_NAME])dnl
-AC_CONFIG_SRCDIR([bootstrap])
+AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_HEADERS(config.h)
 AC_CONFIG_AUX_DIR(config)
 AM_INIT_AUTOMAKE
@@ -48,9 +48,20 @@ dnl Checks for libraries.
 
 dnl Checks for header files.
 
-AC_HEADER_STDC
+# Autoupdate added the next two lines to ensure that your configure
+# script's behavior did not change.  They are probably safe to remove.
+AC_CHECK_INCLUDES_DEFAULT
+AC_PROG_EGREP
+
 AC_HEADER_STAT
-AC_HEADER_TIME
+AC_CHECK_HEADERS_ONCE([sys/time.h])
+# Obsolete code to be removed.
+if test $ac_cv_header_sys_time_h = yes; then
+  AC_DEFINE([TIME_WITH_SYS_TIME],[1],[Define to 1 if you can safely include both <sys/time.h>
+	     and <time.h>.  This macro is obsolete.])
+fi
+# End of obsolete code.
+
 AC_STRUCT_TM
 AC_STRUCT_TIMEZONE
 AC_CHECK_HEADERS([fcntl.h langinfo.h libintl.h limits.h locale.h stdlib.h string.h sys/time.h unistd.h])
