@@ -95,6 +95,8 @@
 
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
+#define _XOPEN_SOURCE
+#define _DEFAULT_SOURCE
 #include <time.h>
 #endif
 
