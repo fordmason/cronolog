@@ -27,7 +27,7 @@ AC_REVISION($Id: configure.ac 1671 2003-07-05 07:19:51Z andrew $)
 
 AC_INIT([cronolog],[1.6.3],[A.Ford@ford-mason.co.uk])
 AC_SUBST([PACKAGE_NAME])dnl
-AC_CONFIG_SRCDIR([bootstrap])
+AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_HEADERS(config.h)
 AC_CONFIG_AUX_DIR(config)
 AM_INIT_AUTOMAKE
@@ -48,9 +48,8 @@ dnl Checks for libraries.
 
 dnl Checks for header files.
 
-AC_HEADER_STDC
 AC_HEADER_STAT
-AC_HEADER_TIME
+AC_CHECK_HEADERS_ONCE([sys/time.h])
 AC_STRUCT_TM
 AC_STRUCT_TIMEZONE
 AC_CHECK_HEADERS([fcntl.h langinfo.h libintl.h limits.h locale.h stdlib.h string.h sys/time.h unistd.h])

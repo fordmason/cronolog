@@ -93,24 +93,55 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-
-#if TIME_WITH_SYS_TIME
-# include <sys/time.h>
-# include <time.h>
-#else
-# if HAVE_SYS_TIME_H
-#  include <sys/time.h>
-# else
-#  include <time.h>
-# endif
+#if HAVE_SYS_TIME_H
+#include <sys/time.h>
+#define _XOPEN_SOURCE
+#define _DEFAULT_SOURCE
+#include <time.h>
 #endif
-
 
 #ifdef _WIN32
 #define mode_t int
 
 #define open  _open
 #define close _close
+Making all in src
+make[2]: Entering directory '/var/tmp/portage/app-admin/cronolog-1.6.2-r6/work/cronolog-1.6.2/src'
+gcc -DHAVE_CONFIG_H -I. -I..  -I../lib   -g -O2 -MT cronotest.o -MD -MP -MF .deps/cronotest.Tpo -c -o cronotest.o cronotest.c
+cronotest.c: In function ‘main’:
+cronotest.c:129:28: warning: implicit declaration of function ‘time’ [-Wimplicit-function-declaration]
+  129 |     time_t      time_now = time(NULL);
+      |                            ^~~~
+cronotest.c:77:1: note: ‘time’ is defined in header ‘<time.h>’; this is probably fixable by adding ‘#include <time.h>’
+   76 | #include "getopt.h"
+  +++ |+#include <time.h>
+   77 | 
+cronotest.c:236:10: warning: implicit declaration of function ‘localtime’ [-Wimplicit-function-declaration]
+  236 |     tm = localtime(&time_now);
+      |          ^~~~~~~~~
+cronotest.c:236:10: note: ‘localtime’ is defined in header ‘<time.h>’; this is probably fixable by adding ‘#include <time.h>’
+cronotest.c:236:8: warning: assignment to ‘struct tm *’ from ‘int’ makes pointer from integer without a cast [-Wint-conversion]
+  236 |     tm = localtime(&time_now);
+      |        ^
+cronotest.c:237:5: warning: implicit declaration of function ‘strftime’ [-Wimplicit-function-declaration]
+  237 |     strftime(buf, sizeof (buf), "%c %Z", tm);
+      |     ^~~~~~~~
+cronotest.c:237:5: note: include ‘<time.h>’ or provide a declaration of ‘strftime’
+cronotest.c:237:5: warning: incompatible implicit declaration of built-in function ‘strftime’ [-Wbuiltin-declaration-mismatch]
+cronotest.c:237:5: note: include ‘<time.h>’ or provide a declaration of ‘strftime’
+cronotest.c:242:12: warning: assignment to ‘struct tm *’ from ‘int’ makes pointer from integer without a cast [-Wint-conversion]
+  242 |         tm = localtime(&time_now);
+      |            ^
+cronotest.c:246:12: warning: assignment to ‘struct tm *’ from ‘int’ makes pointer from integer without a cast [-Wint-conversion]
+  246 |         tm = localtime(&time_now);
+      |            ^
+mv -f .deps/cronotest.Tpo .deps/cronotest.Po
+gcc -DHAVE_CONFIG_H -I. -I..  -I../lib   -g -O2 -MT cronoutils.o -MD -MP -MF .deps/cronoutils.Tpo -c -o cronoutils.o cronoutils.c
+cronoutils.c: In function ‘new_log_file’:
+cronoutils.c:137:10: warning: implicit declaration of function ‘localtime’ [-Wimplicit-function-declaration]
+  137 |     tm = localtime(&start_of_period);
+      |          ^~~~~~~~~
+cronoutils.c:73:1: note: ‘localtime’ is defined in header ‘<time.h>’; this is probably fixable by adding ‘#include <time.h>’
 #define read  _read
 #define write _write
 #define mkdir _mkdir
